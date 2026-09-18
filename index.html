@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FG — Consultorías & Asesorías</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #16213D;
+    --ink-soft: #4C5878;
+    --paper: #FBF9F5;
+    --card: #FFFFFF;
+    --line: #E3E1DA;
+    --plum: #1E2F5C;
+    --plum-deep: #14213F;
+    --copper: #D62E27;
+    --copper-soft: #FBE0DE;
+    --muted: #8B8677;
+    --danger: #B32B24;
+    --ok: #2F6E52;
+    --gold: #8C6A2E;
+    --rust: #7A332E;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  .shell { display: flex; min-height: 100vh; }
+  .shell.hidden { display: none; }
+
+  .auth-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--plum-deep); padding: 20px;
+  }
+  .auth-card {
+    background: var(--card); border-radius: 12px; padding: 34px 32px; width: 100%; max-width: 380px;
+  }
+  .auth-card .monogram { margin: 0 auto 14px; }
+  .auth-card h1 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; text-align: center; margin: 0 0 2px; }
+  .auth-card p.auth-sub { text-align: center; font-size: 12.5px; color: var(--muted); margin: 0 0 22px; }
+  .auth-err { color: var(--danger); font-size: 12.5px; margin-top: 4px; display: none; text-align: center; }
+  .auth-err.show { display: block; }
+  .auth-note { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 14px; }
+
+  .sidebar {
+    width: 220px;
+    flex: 0 0 auto;
+    background: var(--plum-deep);
+    color: #fff;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .sidebar .brand-row { display: flex; align-items: center; gap: 10px; }
+
+  .monogram {
+    width: 40px; height: 40px; border-radius: 8px;
+    background: rgba(255,255,255,0.08); color: var(--copper);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 16px; flex: 0 0 auto;
+  }
+
+  .sidebar .brand-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 14px; line-height: 1.3; }
+  .sidebar .brand-sub { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+
+  .nav-item {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    color: rgba(255,255,255,0.75); font-family: 'Inter', sans-serif; font-size: 13.5px;
+    padding: 10px 12px; border-radius: 6px; cursor: pointer;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .nav-item.active { background: var(--copper); color: #fff; font-weight: 500; }
+
+  .content { flex: 1; min-width: 0; padding: 36px 32px 80px; max-width: 960px; }
+
+  h1.page-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; margin: 0 0 4px; }
+  p.page-sub { margin: 0 0 28px; color: var(--ink-soft); font-size: 13.5px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 26px; }
+
+  .stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .stat-card .lbl { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .stat-card .val { font-family: 'Fraunces', serif; font-weight: 600; font-size: 21px; color: var(--plum-deep); }
+  .stat-card.copper .val { color: var(--copper); }
+
+  .toggle-igv { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin-bottom: 22px; }
+  .toggle-igv button { border: none; background: var(--card); padding: 7px 16px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; font-family: 'Inter', sans-serif; }
+  .toggle-igv button.active { background: var(--plum-deep); color: #fff; }
+
+  .avance-box { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 26px; }
+  .avance-box .avance-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 10px; }
+  .avance-box h3 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; margin: 0; }
+  .avance-top-right { display: flex; align-items: baseline; gap: 10px; }
+  .avance-box .pct { font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; color: var(--plum-deep); }
+  .avance-box .pct.over { color: var(--ok); }
+  .btn-meta { background: none; border: none; color: var(--copper); font-size: 12px; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+  .avance-track { height: 8px; border-radius: 999px; background: var(--copper-soft); overflow: hidden; }
+  .avance-fill { height: 100%; background: var(--plum-deep); border-radius: 999px; }
+  .avance-fill.over { background: var(--ok); }
+  .avance-note { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .avance-note.warn { color: var(--copper); }
+
+  .year-chart { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 26px; }
+  .year-chart h3 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; margin: 0 0 16px; }
+
+  .bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; cursor: pointer; }
+  .bar-col .bar { width: 100%; background: var(--copper-soft); border-radius: 4px 4px 0 0; min-height: 2px; }
+  .bar-col.active .bar { background: var(--plum-deep); }
+  .bar-col .m-lbl { font-size: 10.5px; color: var(--muted); margin-top: 6px; }
+
+  .month-rail { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .month-pill { flex: 0 0 auto; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-size: 13.5px; color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
+  .month-pill.active { background: var(--plum-deep); border-color: var(--plum-deep); color: #fff; }
+
+  .filters-row { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .filters-row input, .filters-row select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--card); color: var(--ink); }
+  .filters-row input { flex: 1; min-width: 160px; }
+
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .toolbar h2 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; margin: 0; }
+
+  button { font-family: 'Inter', sans-serif; cursor: pointer; }
+
+  .btn-add { background: var(--plum-deep); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-size: 13.5px; font-weight: 500; white-space: nowrap; }
+  .btn-add:hover { background: var(--plum); }
+
+  .toolbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; background: var(--card); }
+  .empty p { margin: 0 0 14px; font-size: 14px; }
+
+  .info-box {
+    background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--copper);
+    border-radius: 8px; padding: 14px 18px; margin-bottom: 22px; font-size: 13px; color: var(--ink-soft);
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+
+  .list { display: flex; flex-direction: column; gap: 10px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--plum-deep); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; gap: 16px; }
+  .card.pendiente { border-left-color: var(--copper); }
+
+  .card-main { flex: 1; min-width: 0; }
+  .card-row1 { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; flex-wrap: wrap; }
+  .card-cliente { font-weight: 600; font-size: 15px; }
+  .card-fecha { font-size: 12.5px; color: var(--muted); }
+  .card-empresa-meta { font-size: 12px; color: var(--muted); margin: 0 0 4px; }
+  .card-desc { font-size: 13px; color: var(--ink-soft); margin: 0; }
+
+  .card-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: 0 0 auto; }
+  .card-monto { font-family: 'Fraunces', serif; font-weight: 600; font-size: 16px; color: var(--plum-deep); }
+  .card-monto-sub { font-size: 11.5px; color: var(--muted); }
+
+  .status-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #E9EAF2; color: var(--plum-deep); }
+  .status-badge.pendiente { background: var(--copper-soft); color: var(--copper); }
+  .canal-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #EFECE3; color: var(--gold); }
+  .servicio-badge { display: inline-block; font-size: 11.5px; color: var(--plum-deep); background: #E6EFEC; padding: 2px 9px; border-radius: 999px; margin-bottom: 6px; }
+
+  .card-actions { display: flex; gap: 6px; }
+  .icon-btn { background: none; border: none; color: var(--muted); font-size: 12px; padding: 2px 4px; }
+  .icon-btn:hover { color: var(--ink); }
+
+  .overlay { position: fixed; inset: 0; background: rgba(20,33,63,0.45); display: none; align-items: flex-start; justify-content: center; padding: 40px 16px; z-index: 10; overflow-y: auto; }
+  .overlay.show { display: flex; }
+
+  .modal { background: var(--card); border-radius: 10px; padding: 26px 28px 28px; width: 100%; max-width: 520px; }
+  .modal h3 { font-family: 'Fraunces', serif; font-size: 18px; margin: 0 0 6px; }
+  .modal .modal-sub { font-size: 12.5px; color: var(--muted); margin: 0 0 18px; }
+
+  .section-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 18px 0 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .section-label:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 5px; font-weight: 500; }
+  .field input, .field select, .field textarea { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--paper); color: var(--ink); }
+  .field textarea { resize: vertical; min-height: 56px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .igv-preview { background: var(--copper-soft); border-radius: 6px; padding: 10px 12px; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+
+  .err { color: var(--danger); font-size: 12.5px; margin-top: 4px; display: none; }
+  .err.show { display: block; }
+
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+  .btn-secondary { background: none; border: 1px solid var(--line); padding: 9px 16px; border-radius: 6px; font-size: 13.5px; color: var(--ink-soft); }
+  .btn-secondary:hover { background: var(--paper); }
+
+  .loading { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; }
+
+  .mini-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 26px; }
+  .mini-stat { border-radius: 10px; padding: 16px 18px; color: #fff; }
+  .mini-stat.gold { background: var(--gold); }
+  .mini-stat.rust { background: var(--rust); }
+  .mini-stat .m-lbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.85; margin-bottom: 8px; }
+  .mini-stat .m-val { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin-bottom: 2px; }
+  .mini-stat .m-sub { font-size: 12px; opacity: 0.8; margin-bottom: 10px; }
+  .mini-stat .m-detail { background: none; border: none; color: #fff; font-size: 12.5px; padding: 0; text-decoration: underline; text-underline-offset: 2px; opacity: 0.9; }
+
+  .servicio-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .servicio-row:last-child { border-bottom: none; }
+  .servicio-row .s-name { font-weight: 500; }
+  .servicio-row .s-count { color: var(--muted); font-size: 12px; margin-left: 6px; }
+  .servicio-row .s-amounts { text-align: right; }
+  .servicio-row .s-amounts div:first-child { font-family: 'Fraunces', serif; font-weight: 600; color: var(--plum-deep); }
+  .servicio-row .s-amounts div.s-usd { font-size: 11.5px; color: var(--muted); }
+
+  .file-btn { display: inline-block; background: var(--card); border: 1px solid var(--line); padding: 9px 16px; border-radius: 6px; font-size: 13.5px; color: var(--ink-soft); cursor: pointer; }
+  .file-btn:hover { background: var(--paper); }
+  .file-btn input[type="file"] { display: none; }
+
+  .cliente-row { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .cliente-row .cl-name { font-weight: 600; font-size: 14px; }
+  .cliente-row .cl-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .growth-row { display: flex; gap: 12px; margin-bottom: 26px; }
+  .growth-card { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .growth-card .g-left .lbl { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .growth-card .g-left .g-sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .growth-card .g-pct { font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; }
+  .growth-card .g-pct.up { color: var(--ok); }
+  .growth-card .g-pct.down { color: var(--danger); }
+  .growth-card .g-pct.flat { color: var(--muted); }
+
+  .import-note { font-size: 12px; color: var(--muted); margin: -8px 0 20px; }
+
+  .venc-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .venc-row:last-child { border-bottom: none; }
+  .venc-row .v-name { font-weight: 600; }
+  .venc-row .v-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .venc-badge { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 500; }
+  .venc-badge.critico { background: var(--copper-soft); color: var(--copper); }
+  .venc-badge.proximo { background: #FBF0DC; color: var(--gold); }
+  .venc-badge.vencido { background: #F3DCDA; color: var(--danger); }
+
+  .backup-box { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .backup-box .b-text h3 { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+  .backup-box .b-text p { font-size: 12px; color: var(--muted); margin: 0; max-width: 420px; }
+
+  @media (max-width: 760px) {
+    .shell { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; align-items: center; padding: 14px 16px; gap: 16px; }
+    .nav { flex-direction: row; flex-wrap: wrap; }
+    .content { padding: 24px 18px 60px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .mini-stats-row { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-card">
+    <div class="monogram" style="margin-left:auto;margin-right:auto;">FG</div>
+    <h1 id="auth-title">Ingresar</h1>
+    <p class="auth-sub" id="auth-sub">Flores &amp; Gonzales Asociados Perú S.A.C.</p>
+    <form id="form-auth">
+      <div class="field">
+        <label for="auth-dni">DNI</label>
+        <input type="text" id="auth-dni" placeholder="Tu DNI" inputmode="numeric" maxlength="15">
+      </div>
+      <div class="field">
+        <label for="auth-clave">Clave</label>
+        <input type="password" id="auth-clave" placeholder="Tu clave">
+      </div>
+      <div class="field" id="auth-clave2-field" style="display:none;">
+        <label for="auth-clave2">Repite la clave</label>
+        <input type="password" id="auth-clave2" placeholder="Repite tu clave">
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+      <button type="submit" class="btn-add" style="width:100%; margin-top:6px;" id="auth-submit">Ingresar</button>
+    </form>
+    <p class="auth-note" id="auth-note">Este acceso solo protege la apertura del archivo en este navegador; no reemplaza una contraseña de nivel empresarial.</p>
+  </div>
+</div>
+
+<div class="shell hidden" id="app-shell">
+  <aside class="sidebar">
+    <div class="brand-row">
+      <div class="monogram">FG</div>
+      <div>
+        <div class="brand-name">Flores &amp; Gonzales</div>
+        <div class="brand-sub">Asociados Perú S.A.C.</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item" data-view="inicio">Inicio</button>
+      <button class="nav-item" data-view="clientes">Clientes</button>
+      <button class="nav-item" data-view="bitacora">Área comercial</button>
+      <button class="nav-item" data-view="comisiones">Comisiones</button>
+      <button class="nav-item" data-view="gastos">Gastos</button>
+      <button class="nav-item" data-view="respaldo">Respaldo</button>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div id="app-body"><div class="loading">Cargando registros…</div></div>
+  </main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modal-title">Nueva venta</h3>
+    <p class="modal-sub">Registra el servicio, la empresa y quién refirió la venta.</p>
+    <form id="form">
+      <div class="section-label">Servicio</div>
+      <div class="two-col">
+        <div class="field">
+          <label for="f-fecha">Fecha</label>
+          <input type="date" id="f-fecha" required>
+        </div>
+        <div class="field">
+          <label for="f-estado">Estado</label>
+          <select id="f-estado">
+            <option value="cobrado">Cobrado</option>
+            <option value="pendiente">Pendiente de cobro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-servicio">Tipo de servicio</label>
+        <select id="f-servicio">
+          <option>Asesoría en seguros</option>
+          <option>Asesoría en cartas fianza</option>
+          <option>Asesoría contable</option>
+          <option>Asesoría financiera</option>
+          <option>Asesoría general</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field" id="f-servicio-subtipo-field" style="display:none;">
+        <label for="f-servicio-subtipo">Tipo de seguro</label>
+        <select id="f-servicio-subtipo">
+          <option>Vehicular</option>
+          <option>Vida</option>
+          <option>Salud</option>
+          <option>Empresarial</option>
+        </select>
+      </div>
+      <div class="field" id="f-servicio-otro-field" style="display:none;">
+        <label for="f-servicio-otro">Especifica el servicio</label>
+        <input type="text" id="f-servicio-otro" placeholder="Nombre del servicio">
+      </div>
+      <div class="field">
+        <label for="f-vigencia">Vigencia hasta (opcional — cartas fianza / pólizas)</label>
+        <input type="date" id="f-vigencia">
+      </div>
+
+      <div class="section-label">Datos de la empresa cliente</div>
+      <div class="field">
+        <label for="f-cliente">Razón social / cliente</label>
+        <input type="text" id="f-cliente" placeholder="Nombre de la empresa o persona" list="lista-clientes">
+        <div class="err" id="err-cliente">Ingresa el nombre del cliente.</div>
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label for="f-ruc">RUC / DNI (opcional)</label>
+          <input type="text" id="f-ruc" placeholder="20123456789">
+        </div>
+        <div class="field">
+          <label for="f-contacto">Persona de contacto (opcional)</label>
+          <input type="text" id="f-contacto" placeholder="Nombre y teléfono">
+        </div>
+      </div>
+
+      <div class="section-label">Monto</div>
+      <div class="two-col">
+        <div class="field">
+          <label for="f-moneda">Moneda</label>
+          <select id="f-moneda">
+            <option value="PEN">Soles (S/)</option>
+            <option value="USD">Dólares (US$)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-monto-servicio">Monto del servicio</label>
+          <input type="number" id="f-monto-servicio" step="0.01" min="0" placeholder="0.00">
+          <div class="err" id="err-monto-servicio">Ingresa un monto válido.</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label for="f-comision-tipo">Comisión de FG</label>
+          <select id="f-comision-tipo">
+            <option value="porcentaje">Porcentaje del servicio</option>
+            <option value="fijo">Monto fijo</option>
+          </select>
+        </div>
+        <div class="field" id="f-comision-valor-field">
+          <label for="f-comision-valor" id="f-comision-valor-label">Porcentaje (0.3% – 100%)</label>
+          <input type="number" id="f-comision-valor" step="0.1" min="0.3" max="100" placeholder="ej. 10">
+          <div class="err" id="err-comision-valor">Ingresa un valor entre 0.3 y 100.</div>
+        </div>
+      </div>
+      <div class="igv-preview" id="igv-preview">
+        <span>Comisión FG (con IGV): S/ 0.00</span>
+        <span>Sin IGV: S/ 0.00</span>
+      </div>
+
+      <div class="section-label">Asesor o canal</div>
+      <div class="field">
+        <label for="f-canal">¿Quién refirió la venta?</label>
+        <select id="f-canal">
+          <option value="directo">Directo (sin asesor)</option>
+          <option value="asesor">Con asesor referente</option>
+        </select>
+      </div>
+      <div id="asesor-fields">
+        <div class="field">
+          <label for="f-asesor">Nombre del asesor</label>
+          <input type="text" id="f-asesor" placeholder="Nombre del asesor" list="lista-asesores">
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <label for="f-asesor-tipo">Cómo se le paga</label>
+            <select id="f-asesor-tipo">
+              <option value="porcentaje">Porcentaje de la venta</option>
+              <option value="fijo">Monto fijo</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-asesor-valor" id="f-asesor-valor-label">Porcentaje (%)</label>
+            <input type="number" id="f-asesor-valor" step="0.1" min="0" placeholder="ej. 30">
+          </div>
+        </div>
+        <div class="igv-preview" id="reparto-preview">
+          <span>Comisión pagada al asesor: S/ 0.00</span>
+          <span>Utilidad neta FG: S/ 0.00</span>
+        </div>
+        <div class="field" style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="f-asesor-pagado" style="width:auto;">
+          <label for="f-asesor-pagado" style="margin:0;">Ya le pagué esta comisión al asesor</label>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btn-cancel">Cancelar</button>
+        <button type="submit" class="btn-add">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-meta">
+  <div class="modal">
+    <h3>Meta mensual de ingresos</h3>
+    <form id="form-meta">
+      <div class="field">
+        <label for="f-meta">Meta (con IGV, S/)</label>
+        <input type="number" id="f-meta" step="0.01" min="0" placeholder="0.00">
+        <div class="err" id="err-meta">Ingresa un monto válido.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btn-cancel-meta">Cancelar</button>
+        <button type="submit" class="btn-add">Guardar meta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<datalist id="lista-clientes"></datalist>
+<datalist id="lista-asesores"></datalist>
+
+<div class="overlay" id="overlay-cliente">
+  <div class="modal">
+    <h3 id="modal-cliente-title">Nuevo cliente</h3>
+    <form id="form-cliente">
+      <div class="field">
+        <label for="cl-razon">Razón social / nombre</label>
+        <input type="text" id="cl-razon" placeholder="Nombre de la empresa o persona">
+        <div class="err" id="err-cl-razon">Ingresa el nombre del cliente.</div>
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label for="cl-ruc">RUC / DNI (opcional)</label>
+          <input type="text" id="cl-ruc" placeholder="20123456789">
+        </div>
+        <div class="field">
+          <label for="cl-representante">Representante legal (opcional)</label>
+          <input type="text" id="cl-representante" placeholder="Nombre completo">
+        </div>
+      </div>
+      <div class="field">
+        <label for="cl-direccion">Dirección / domicilio (opcional)</label>
+        <input type="text" id="cl-direccion" placeholder="Av., calle, número, distrito">
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label for="cl-actividad">Actividad de la empresa (opcional)</label>
+          <input type="text" id="cl-actividad" placeholder="Ej. transporte de carga">
+        </div>
+        <div class="field">
+          <label for="cl-giro">Giro del negocio (opcional)</label>
+          <input type="text" id="cl-giro" placeholder="Ej. venta al por mayor">
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label for="cl-contacto">Persona de contacto (opcional)</label>
+          <input type="text" id="cl-contacto" placeholder="Nombre">
+        </div>
+        <div class="field">
+          <label for="cl-celular">Celular (opcional)</label>
+          <input type="text" id="cl-celular" placeholder="9xxxxxxxx">
+        </div>
+      </div>
+      <div class="field">
+        <label for="cl-correo">Correo (opcional)</label>
+        <input type="email" id="cl-correo" placeholder="correo@empresa.com">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btn-cancel-cliente">Cancelar</button>
+        <button type="submit" class="btn-add">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-gasto">
+  <div class="modal">
+    <h3 id="modal-gasto-title">Nuevo gasto</h3>
+    <form id="form-gasto">
+      <div class="two-col">
+        <div class="field">
+          <label for="g-fecha">Fecha</label>
+          <input type="date" id="g-fecha" required>
+        </div>
+        <div class="field">
+          <label for="g-categoria">Categoría</label>
+          <select id="g-categoria">
+            <option>Movilidad</option>
+            <option>Trámites</option>
+            <option>Alquiler</option>
+            <option>Servicios</option>
+            <option>Marketing</option>
+            <option>Planilla / honorarios</option>
+            <option>Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="g-concepto">Concepto</label>
+        <input type="text" id="g-concepto" placeholder="¿En qué se gastó?">
+        <div class="err" id="err-g-concepto">Ingresa el concepto del gasto.</div>
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label for="g-moneda">Moneda</label>
+          <select id="g-moneda">
+            <option value="PEN">Soles (S/)</option>
+            <option value="USD">Dólares (US$)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="g-monto">Monto</label>
+          <input type="number" id="g-monto" step="0.01" min="0" placeholder="0.00">
+          <div class="err" id="err-g-monto">Ingresa un monto válido.</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btn-cancel-gasto">Cancelar</button>
+        <button type="submit" class="btn-add">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const IGV_RATE = 0.18;
+
+function hashSimple(texto) {
+  let h = 0;
+  for (let i = 0; i < texto.length; i++) { h = ((h << 5) - h) + texto.charCodeAt(i); h |= 0; }
+  return String(h);
+}
+
+let authModo = 'login'; // 'login' | 'setup'
+let authCambiandoDesdeApp = false;
+
+function mostrarAuth(modo, cambiandoDesdeApp) {
+  authModo = modo;
+  authCambiandoDesdeApp = !!cambiandoDesdeApp;
+  document.getElementById('auth-err').classList.remove('show');
+  document.getElementById('form-auth').reset();
+  document.getElementById('auth-clave2-field').style.display = modo === 'setup' ? 'block' : 'none';
+  document.getElementById('auth-title').textContent = modo === 'setup' ? 'Crea tu acceso' : 'Ingresar';
+  document.getElementById('auth-sub').textContent = modo === 'setup' ? 'Define el DNI y la clave con la que abrirás este sistema.' : 'Flores & Gonzales Asociados Perú S.A.C.';
+  document.getElementById('auth-submit').textContent = modo === 'setup' ? 'Guardar acceso' : 'Ingresar';
+  if (modo === 'setup') {
+    const actual = JSON.parse(localStorage.getItem('fg:auth') || 'null');
+    if (actual && actual.dni) document.getElementById('auth-dni').value = actual.dni;
+  }
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-shell').classList.add('hidden');
+}
+
+function ocultarAuth() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-shell').classList.remove('hidden');
+}
+
+document.getElementById('form-auth').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const dni = document.getElementById('auth-dni').value.trim();
+  const clave = document.getElementById('auth-clave').value;
+  const err = document.getElementById('auth-err');
+
+  if (!dni || !clave) { err.textContent = 'Completa el DNI y la clave.'; err.classList.add('show'); return; }
+
+  if (authModo === 'setup') {
+    const clave2 = document.getElementById('auth-clave2').value;
+    if (clave.length < 4) { err.textContent = 'La clave debe tener al menos 4 caracteres.'; err.classList.add('show'); return; }
+    if (clave !== clave2) { err.textContent = 'Las claves no coinciden.'; err.classList.add('show'); return; }
+    localStorage.setItem('fg:auth', JSON.stringify({ dni, hash: hashSimple(clave) }));
+    err.classList.remove('show');
+    if (authCambiandoDesdeApp) {
+      alert('Acceso actualizado correctamente.');
+      currentView = 'respaldo';
+      render();
+    } else {
+      ocultarAuth();
+      init();
+    }
+    return;
+  }
+
+  const guardado = JSON.parse(localStorage.getItem('fg:auth') || 'null');
+  if (!guardado || guardado.dni !== dni || guardado.hash !== hashSimple(clave)) {
+    err.textContent = 'DNI o clave incorrectos.';
+    err.classList.add('show');
+    return;
+  }
+  err.classList.remove('show');
+  ocultarAuth();
+  init();
+});
+
+(function initAuth() {
+  const guardado = JSON.parse(localStorage.getItem('fg:auth') || 'null');
+  if (guardado && guardado.dni) mostrarAuth('login');
+  else mostrarAuth('setup');
+})();
+
+let ventas = [];
+let clientes = [];
+let gastos = [];
+let meta = 0;
+let currentMonthKey = null;
+let editingId = null;
+let viewMode = 'con';
+let currentView = 'inicio';
+let searchTerm = '';
+let filterEstado = 'todos';
+let searchTermComision = '';
+let filterEstadoComision = 'todos';
+let comisionesTab = 'cobrar';
+let selectedClienteRazon = null;
+
+function monthKey(dateStr) { return dateStr.slice(0,7); }
+function prevMonthKey(key) {
+  const [y,m] = key.split('-').map(Number);
+  const d = new Date(y, m-2, 1);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function monthLabel(key) {
+  const [y,m] = key.split('-').map(Number);
+  return MESES[m-1] + ' ' + y;
+}
+function fmtMoney(n) { return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtCurrency(n, moneda) {
+  const symbol = moneda === 'USD' ? 'US$ ' : 'S/ ';
+  return symbol + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function sinIGV(monto) { return monto / (1 + IGV_RATE); }
+function igvDe(monto) { return monto - sinIGV(monto); }
+
+async function loadVentas() {
+  try {
+    const raw = localStorage.getItem('fg:ventas');
+    ventas = raw ? JSON.parse(raw) : [];
+  } catch (e) { ventas = []; }
+}
+async function saveVentas() { localStorage.setItem('fg:ventas', JSON.stringify(ventas)); }
+
+async function loadMeta() {
+  try {
+    const raw = localStorage.getItem('fg:meta');
+    meta = raw ? Number(raw) : 0;
+  } catch (e) { meta = 0; }
+}
+async function saveMeta() { localStorage.setItem('fg:meta', String(meta)); }
+
+async function loadClientes() {
+  try {
+    const raw = localStorage.getItem('fg:clientes');
+    clientes = raw ? JSON.parse(raw) : [];
+  } catch (e) { clientes = []; }
+}
+async function saveClientes() { localStorage.setItem('fg:clientes', JSON.stringify(clientes)); }
+
+async function loadGastos() {
+  try {
+    const raw = localStorage.getItem('fg:gastos');
+    gastos = raw ? JSON.parse(raw) : [];
+  } catch (e) { gastos = []; }
+}
+async function saveGastos() { localStorage.setItem('fg:gastos', JSON.stringify(gastos)); }
+
+function refreshListas() {
+  const dl = document.getElementById('lista-clientes');
+  dl.innerHTML = clientes.map(c => '<option value="' + escapeHtml(c.razon) + '">').join('');
+  const asesores = [...new Set(ventas.filter(v => v.asesor).map(v => v.asesor))];
+  document.getElementById('lista-asesores').innerHTML = asesores.map(a => '<option value="' + escapeHtml(a) + '">').join('');
+}
+
+function autocompletarPorNombre(nombre, rucFieldId, contactoFieldId) {
+  const c = clientes.find(x => x.razon.toLowerCase() === nombre.trim().toLowerCase());
+  if (c) {
+    if (rucFieldId && !document.getElementById(rucFieldId).value) document.getElementById(rucFieldId).value = c.ruc || '';
+    if (contactoFieldId && !document.getElementById(contactoFieldId).value) document.getElementById(contactoFieldId).value = c.contacto || '';
+  }
+}
+
+function parseClientesCSV(text) {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const out = [];
+  lines.forEach((line, i) => {
+    const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+    if (i === 0 && /raz[oó]n|cliente|nombre/i.test(cols[0] || '')) return;
+    if (!cols[0]) return;
+    out.push({ razon: cols[0], ruc: cols[1] || '', contacto: cols[2] || '' });
+  });
+  return out;
+}
+
+// --- Cálculos de comisión, interconectados desde ventas ---
+function comisionRecibidaDe(v) { return Number(v.monto); }
+function comisionPagadaDe(v) {
+  if (!v.asesor) return 0;
+  const recibida = comisionRecibidaDe(v);
+  return v.asesorTipo === 'porcentaje' ? recibida * (Number(v.asesorValor || 0) / 100) : Number(v.asesorValor || 0);
+}
+function utilidadNetaDe(v) { return comisionRecibidaDe(v) - comisionPagadaDe(v); }
+
+function totalForMonth(key, mode) {
+  const items = ventas.filter(v => monthKey(v.fecha) === key);
+  const sum = items.reduce((a,v) => a + Number(v.monto), 0);
+  return mode === 'sin' ? sinIGV(sum) : sum;
+}
+
+function vencimientosProximos() {
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const items = ventas.filter(v => v.vigencia).map(v => {
+    const fv = new Date(v.vigencia + 'T00:00:00');
+    const dias = Math.round((fv - hoy) / 86400000);
+    return { v, dias };
+  }).filter(x => x.dias <= 30);
+  return items.sort((a,b) => a.dias - b.dias);
+}
+
+function crecimientoMensual(key) {
+  const actual = totalForMonth(key, 'con');
+  const prevKey = prevMonthKey(key);
+  const anterior = totalForMonth(prevKey, 'con');
+  if (anterior === 0) return { pct: null, actual, anterior, prevKey };
+  const pct = ((actual - anterior) / anterior) * 100;
+  return { pct, actual, anterior, prevKey };
+}
+
+function flujoComisiones(items) {
+  const recibidaPEN = items.filter(v => v.moneda === 'PEN').reduce((a,v) => a + comisionRecibidaDe(v), 0);
+  const recibidaUSD = items.filter(v => v.moneda === 'USD').reduce((a,v) => a + comisionRecibidaDe(v), 0);
+  const pagadaPEN = items.filter(v => v.moneda === 'PEN').reduce((a,v) => a + comisionPagadaDe(v), 0);
+  const pagadaUSD = items.filter(v => v.moneda === 'USD').reduce((a,v) => a + comisionPagadaDe(v), 0);
+  const netaPEN = recibidaPEN - pagadaPEN;
+  const netaUSD = recibidaUSD - pagadaUSD;
+  const pct = recibidaPEN > 0 ? Math.round((netaPEN / recibidaPEN) * 100) : null;
+  return { recibidaPEN, recibidaUSD, pagadaPEN, pagadaUSD, netaPEN, netaUSD, pct };
+}
+
+function comisionesAsesoresPendientes(key) {
+  const items = ventas.filter(v => monthKey(v.fecha) === key && v.estado === 'pendiente' && v.asesor);
+  const pen = items.filter(v => v.moneda === 'PEN');
+  const usd = items.filter(v => v.moneda === 'USD');
+  return {
+    pen: { total: pen.reduce((a,v) => a + comisionPagadaDe(v), 0), count: pen.length },
+    usd: { total: usd.reduce((a,v) => a + comisionPagadaDe(v), 0), count: usd.length }
+  };
+}
+
+function rankingAsesores(yearPrefix) {
+  const items = ventas.filter(v => v.fecha.startsWith(yearPrefix) && v.asesor);
+  const map = {};
+  items.forEach(v => {
+    if (!map[v.asesor]) map[v.asesor] = { count: 0, pagadoPEN: 0, pagadoUSD: 0, generadoPEN: 0, generadoUSD: 0 };
+    map[v.asesor].count += 1;
+    map[v.asesor]['pagado' + v.moneda] += comisionPagadaDe(v);
+    map[v.asesor]['generado' + v.moneda] += comisionRecibidaDe(v);
+  });
+  return Object.entries(map).sort((a,b) => (b[1].generadoPEN + b[1].generadoUSD) - (a[1].generadoPEN + a[1].generadoUSD));
+}
+
+function comisionesPorServicio(key) {
+  const items = ventas.filter(v => monthKey(v.fecha) === key);
+  const map = {};
+  items.forEach(v => {
+    const serv = v.servicio || 'Otro';
+    if (!map[serv]) map[serv] = { count: 0, PEN: 0, USD: 0 };
+    map[serv].count += 1;
+    map[serv][v.moneda] += comisionRecibidaDe(v);
+  });
+  return Object.entries(map).sort((a,b) => (b[1].PEN + b[1].USD) - (a[1].PEN + a[1].USD));
+}
+
+function setActiveNav() {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === currentView));
+}
+
+function render() {
+  setActiveNav();
+  if (currentView === 'bitacora') renderBitacora();
+  else if (currentView === 'comisiones') renderComisionesReporte();
+  else if (currentView === 'gastos') renderGastos();
+  else if (currentView === 'clientes') renderClientes();
+  else if (currentView === 'historial-cliente') renderHistorialCliente();
+  else if (currentView === 'respaldo') renderRespaldo();
+  else renderInicio();
+}
+
+function renderInicio() {
+  const body = document.getElementById('app-body');
+  body.innerHTML = '';
+
+  const sinVentas = ventas.length === 0;
+  const keys = [...new Set(ventas.map(v => monthKey(v.fecha)))].sort().reverse();
+  if (!currentMonthKey || (!sinVentas && !keys.includes(currentMonthKey))) {
+    currentMonthKey = keys[0] || new Date().toISOString().slice(0,7);
+  }
+
+  const header = document.createElement('div');
+  header.innerHTML = '<h1 class="page-title">Inicio</h1><p class="page-sub">Panorama de ' + monthLabel(currentMonthKey) + '.</p>';
+  body.appendChild(header);
+
+  if (sinVentas) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>Todavía no registraste ninguna venta. Ve a "Área comercial" para registrar la primera — los indicadores de abajo se irán llenando solos.</p>';
+    body.appendChild(empty);
+  }
+
+  const vencimientos = vencimientosProximos();
+  if (vencimientos.length > 0) {
+    const vBox = document.createElement('div');
+    vBox.className = 'year-chart';
+    vBox.innerHTML = '<h3>Vencimientos próximos</h3>';
+    vencimientos.forEach(({v, dias}) => {
+      const row = document.createElement('div');
+      row.className = 'venc-row';
+      const badgeClass = dias < 0 ? 'vencido' : (dias <= 7 ? 'critico' : 'proximo');
+      const badgeTxt = dias < 0 ? 'Vencido hace ' + Math.abs(dias) + ' días' : (dias === 0 ? 'Vence hoy' : 'Vence en ' + dias + ' días');
+      row.innerHTML =
+        '<div><div class="v-name">' + escapeHtml(v.cliente) + '</div><div class="v-meta">' + escapeHtml(v.servicio || 'Otro') + ' · vigente hasta ' + new Date(v.vigencia + 'T00:00:00').toLocaleDateString('es-PE') + '</div></div>' +
+        '<span class="venc-badge ' + badgeClass + '">' + badgeTxt + '</span>';
+      vBox.appendChild(row);
+    });
+    body.appendChild(vBox);
+  }
+
+  const monthItems = ventas.filter(v => monthKey(v.fecha) === currentMonthKey);
+  const totalConIGV = monthItems.reduce((a,v) => a + Number(v.monto), 0);
+  const totalSinIGV = sinIGV(totalConIGV);
+  const igvMes = totalConIGV - totalSinIGV;
+
+  const yearPrefix = currentMonthKey.slice(0,4);
+  const yearTotal = ventas.filter(v => v.fecha.startsWith(yearPrefix)).reduce((a,v) => a + Number(v.monto), 0);
+
+  const statsRow = document.createElement('div');
+  statsRow.className = 'stats-row';
+  statsRow.innerHTML =
+    '<div class="stat-card"><div class="lbl">Total del mes (con IGV)</div><div class="val">' + fmtMoney(totalConIGV) + '</div></div>' +
+    '<div class="stat-card"><div class="lbl">Total del mes (sin IGV)</div><div class="val">' + fmtMoney(totalSinIGV) + '</div></div>' +
+    '<div class="stat-card copper"><div class="lbl">IGV del mes</div><div class="val">' + fmtMoney(igvMes) + '</div></div>' +
+    '<div class="stat-card"><div class="lbl">Ventas registradas</div><div class="val">' + monthItems.length + '</div></div>';
+  body.appendChild(statsRow);
+
+  const pendientesVenta = monthItems.filter(v => v.estado === 'pendiente');
+  const pendPEN = pendientesVenta.filter(v => v.moneda === 'PEN').reduce((a,v) => a + Number(v.monto), 0);
+  const pendUSD = pendientesVenta.filter(v => v.moneda === 'USD').reduce((a,v) => a + Number(v.monto), 0);
+  if (pendientesVenta.length > 0) {
+    const pendRow = document.createElement('div');
+    pendRow.className = 'mini-stats-row';
+    pendRow.style.gridTemplateColumns = '1fr';
+    pendRow.innerHTML =
+      '<div class="mini-stat rust"><div class="m-lbl">Pendiente por cobrar este mes</div>' +
+      '<div class="m-val">' + fmtCurrency(pendPEN, 'PEN') + (pendUSD > 0 ? ' · ' + fmtCurrency(pendUSD, 'USD') : '') + '</div>' +
+      '<div class="m-sub">' + pendientesVenta.length + (pendientesVenta.length === 1 ? ' venta pendiente de cobro' : ' ventas pendientes de cobro') + '</div>' +
+      '<button class="m-detail" id="btn-ver-pend-venta">Ver detalle</button></div>';
+    body.appendChild(pendRow);
+    document.getElementById('btn-ver-pend-venta').onclick = () => { filterEstado = 'pendiente'; currentView = 'bitacora'; render(); };
+  }
+
+  const avanceBox = document.createElement('div');
+  avanceBox.className = 'avance-box';
+  if (meta > 0) {
+    const pct = Math.round((totalConIGV / meta) * 100);
+    const over = pct >= 100;
+    const falta = meta - totalConIGV;
+    avanceBox.innerHTML =
+      '<div class="avance-top"><h3>Meta mensual — ' + fmtMoney(meta) + '</h3>' +
+      '<div class="avance-top-right"><span class="pct' + (over ? ' over' : '') + '">' + pct + '%</span><button class="btn-meta" id="btn-edit-meta">Editar meta</button></div></div>' +
+      '<div class="avance-track"><div class="avance-fill' + (over ? ' over' : '') + '" style="width:' + Math.min(pct,100) + '%"></div></div>' +
+      '<div class="avance-note' + (over ? '' : ' warn') + '">' +
+      (over ? 'Meta alcanzada — vas ' + fmtMoney(totalConIGV - meta) + ' por encima.' : 'Llevas ' + fmtMoney(totalConIGV) + ' de ' + fmtMoney(meta) + '. Te faltan ' + fmtMoney(falta) + '.') + '</div>';
+  } else {
+    avanceBox.innerHTML = '<div class="avance-top"><h3>Meta mensual</h3><button class="btn-meta" id="btn-edit-meta">Definir meta</button></div><div class="avance-note">Todavía no definiste una meta de ingresos mensual.</div>';
+  }
+  body.appendChild(avanceBox);
+  document.getElementById('btn-edit-meta').onclick = () => openMetaModal();
+
+  const crecimiento = crecimientoMensual(currentMonthKey);
+  const growthRow = document.createElement('div');
+  growthRow.className = 'growth-row';
+  const gCard = document.createElement('div');
+  gCard.className = 'growth-card';
+  if (crecimiento.pct === null) {
+    gCard.innerHTML =
+      '<div class="g-left"><div class="lbl">Crecimiento vs mes anterior</div><div class="g-sub">No hay facturación en ' + monthLabel(crecimiento.prevKey) + ' para comparar.</div></div>' +
+      '<div class="g-pct flat">—</div>';
+  } else {
+    const up = crecimiento.pct > 0;
+    const flat = crecimiento.pct === 0;
+    const arrow = flat ? '' : (up ? '▲ ' : '▼ ');
+    gCard.innerHTML =
+      '<div class="g-left"><div class="lbl">Crecimiento vs mes anterior</div><div class="g-sub">' + fmtMoney(crecimiento.actual) + ' este mes — ' + fmtMoney(crecimiento.anterior) + ' en ' + monthLabel(crecimiento.prevKey) + '</div></div>' +
+      '<div class="g-pct ' + (flat ? 'flat' : (up ? 'up' : 'down')) + '">' + arrow + Math.abs(crecimiento.pct).toFixed(1) + '%</div>';
+  }
+  growthRow.appendChild(gCard);
+  body.appendChild(growthRow);
+
+  const yearMonths = [];
+  for (let m = 1; m <= 12; m++) yearMonths.push(yearPrefix + '-' + String(m).padStart(2,'0'));
+  const yearTotals = yearMonths.map(k => totalForMonth(k, 'con'));
+  const maxVal = Math.max(...yearTotals, 1);
+
+  const yearChart = document.createElement('div');
+  yearChart.className = 'year-chart';
+  yearChart.innerHTML = '<h3>Ingresos ' + yearPrefix + ' — total ' + fmtMoney(yearTotal) + '</h3>';
+  const bars = document.createElement('div');
+  bars.className = 'bars';
+  yearMonths.forEach((k, i) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col' + (k === currentMonthKey ? ' active' : '');
+    const h = yearTotals[i] > 0 ? Math.max((yearTotals[i] / maxVal) * 100, 3) : 2;
+    col.innerHTML = '<div class="bar" style="height:' + h + '%"></div><div class="m-lbl">' + MESES[i].slice(0,3) + '</div>';
+    if (yearTotals[i] > 0) col.onclick = () => { currentMonthKey = k; render(); };
+    bars.appendChild(col);
+  });
+  yearChart.appendChild(bars);
+  body.appendChild(yearChart);
+
+  const mesNum = Number(currentMonthKey.slice(5,7));
+  const promedioMensual = yearTotal / mesNum;
+  const proyeccion = promedioMensual * 12;
+  const proyBox = document.createElement('div');
+  proyBox.className = 'year-chart';
+  proyBox.innerHTML =
+    '<h3>Proyección de cierre de año ' + yearPrefix + '</h3>' +
+    '<div class="stats-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 0;">' +
+      '<div class="stat-card"><div class="lbl">Llevas acumulado (' + mesNum + ' ' + (mesNum===1?'mes':'meses') + ')</div><div class="val">' + fmtMoney(yearTotal) + '</div></div>' +
+      '<div class="stat-card"><div class="lbl">Promedio mensual</div><div class="val">' + fmtMoney(promedioMensual) + '</div></div>' +
+      '<div class="stat-card copper"><div class="lbl">Proyección de cierre</div><div class="val">' + fmtMoney(proyeccion) + '</div></div>' +
+    '</div>' +
+    '<div class="avance-note" style="margin-top:12px;">Estimado manteniendo tu ritmo actual de facturación — no considera estacionalidad.</div>';
+  body.appendChild(proyBox);
+
+  const flujoMesInicio = flujoComisiones(monthItems);
+  const yearItemsInicio = ventas.filter(v => v.fecha.startsWith(yearPrefix));
+  const flujoAnioInicio = flujoComisiones(yearItemsInicio);
+  const gastosMesInicio = totalGastosMes(currentMonthKey);
+  const gastosAnioInicio = gastos.filter(g => g.fecha.startsWith(yearPrefix));
+  const gastosAnioPEN = gastosAnioInicio.filter(g=>g.moneda==='PEN').reduce((a,g)=>a+Number(g.monto),0);
+  const gastosAnioUSD = gastosAnioInicio.filter(g=>g.moneda==='USD').reduce((a,g)=>a+Number(g.monto),0);
+  const rentaRealMesPEN = flujoMesInicio.netaPEN - gastosMesInicio.PEN;
+  const rentaRealAnioPEN = flujoAnioInicio.netaPEN - gastosAnioPEN;
+
+  const rentaBox = document.createElement('div');
+  rentaBox.className = 'year-chart';
+  rentaBox.innerHTML =
+    '<h3>Rentabilidad neta de la empresa</h3>' +
+    '<div class="stats-row" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 14px;">' +
+      '<div class="stat-card"><div class="lbl">Utilidad neta del mes (con IGV)</div><div class="val">' + fmtCurrency(flujoMesInicio.netaPEN,'PEN') + '</div>' + (flujoMesInicio.netaUSD !== 0 ? '<div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoMesInicio.netaUSD,'USD') + '</div>' : '') + '</div>' +
+      '<div class="stat-card copper"><div class="lbl">Utilidad neta del mes (sin IGV)</div><div class="val">' + fmtCurrency(sinIGV(flujoMesInicio.netaPEN),'PEN') + '</div>' + (flujoMesInicio.netaUSD !== 0 ? '<div class="lbl" style="margin-top:6px;">' + fmtCurrency(sinIGV(flujoMesInicio.netaUSD),'USD') + '</div>' : '') + '</div>' +
+    '</div>' +
+    '<div class="stats-row" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 14px;">' +
+      '<div class="stat-card"><div class="lbl">Utilidad neta acumulada ' + yearPrefix + ' (con IGV)</div><div class="val">' + fmtCurrency(flujoAnioInicio.netaPEN,'PEN') + '</div>' + (flujoAnioInicio.netaUSD !== 0 ? '<div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoAnioInicio.netaUSD,'USD') + '</div>' : '') + '</div>' +
+      '<div class="stat-card copper"><div class="lbl">Utilidad neta acumulada ' + yearPrefix + ' (sin IGV)</div><div class="val">' + fmtCurrency(sinIGV(flujoAnioInicio.netaPEN),'PEN') + '</div>' + (flujoAnioInicio.netaUSD !== 0 ? '<div class="lbl" style="margin-top:6px;">' + fmtCurrency(sinIGV(flujoAnioInicio.netaUSD),'USD') + '</div>' : '') + '</div>' +
+    '</div>' +
+    '<div class="stats-row" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 0;">' +
+      '<div class="stat-card"><div class="lbl">Rentabilidad real del mes (– gastos operativos)</div><div class="val">' + fmtCurrency(rentaRealMesPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">Gastos: ' + fmtCurrency(gastosMesInicio.PEN,'PEN') + (gastosMesInicio.USD>0?' · '+fmtCurrency(gastosMesInicio.USD,'USD'):'') + '</div></div>' +
+      '<div class="stat-card copper"><div class="lbl">Rentabilidad real acumulada ' + yearPrefix + '</div><div class="val">' + fmtCurrency(rentaRealAnioPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">Gastos: ' + fmtCurrency(gastosAnioPEN,'PEN') + (gastosAnioUSD>0?' · '+fmtCurrency(gastosAnioUSD,'USD'):'') + '</div></div>' +
+    '</div>';
+  body.appendChild(rentaBox);
+
+  const comTotales = { count: monthItems.length, recibidaPEN: monthItems.filter(v=>v.moneda==='PEN').reduce((a,v)=>a+comisionRecibidaDe(v),0), recibidaUSD: monthItems.filter(v=>v.moneda==='USD').reduce((a,v)=>a+comisionRecibidaDe(v),0) };
+  const comStats = document.createElement('div');
+  comStats.className = 'stats-row';
+  comStats.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  comStats.innerHTML =
+    '<div class="stat-card"><div class="lbl">Comisiones registradas</div><div class="val">' + comTotales.count + '</div></div>' +
+    '<div class="stat-card copper"><div class="lbl">Total comisiones (S/)</div><div class="val">' + fmtCurrency(comTotales.recibidaPEN, 'PEN') + '</div></div>' +
+    '<div class="stat-card"><div class="lbl">Total comisiones (US$)</div><div class="val">' + fmtCurrency(comTotales.recibidaUSD, 'USD') + '</div></div>';
+  body.appendChild(comStats);
+
+  const porServicio = comisionesPorServicio(currentMonthKey);
+  const servicioBox = document.createElement('div');
+  servicioBox.className = 'year-chart';
+  if (porServicio.length === 0) {
+    servicioBox.innerHTML = '<h3>Comisión ganada por servicio</h3><div class="avance-note">Todavía no registraste ventas este mes.</div>';
+  } else {
+    servicioBox.innerHTML = '<h3>Comisión ganada por servicio</h3>';
+    porServicio.forEach(([servicio, v]) => {
+      const row = document.createElement('div');
+      row.className = 'servicio-row';
+      row.innerHTML =
+        '<div><span class="s-name">' + escapeHtml(servicio) + '</span><span class="s-count">' + v.count + (v.count === 1 ? ' venta' : ' ventas') + '</span></div>' +
+        '<div class="s-amounts"><div>' + fmtCurrency(v.PEN, 'PEN') + '</div>' + (v.USD > 0 ? '<div class="s-usd">' + fmtCurrency(v.USD, 'USD') + '</div>' : '') + '</div>';
+      servicioBox.appendChild(row);
+    });
+  }
+  body.appendChild(servicioBox);
+
+  const rail = document.createElement('div');
+  rail.className = 'month-rail';
+  keys.forEach(k => {
+    const pill = document.createElement('button');
+    pill.className = 'month-pill' + (k === currentMonthKey ? ' active' : '');
+    pill.textContent = monthLabel(k);
+    pill.onclick = () => { currentMonthKey = k; render(); };
+    rail.appendChild(pill);
+  });
+  body.appendChild(rail);
+
+  const resumenBox = document.createElement('div');
+  resumenBox.className = 'backup-box';
+  resumenBox.innerHTML =
+    '<div class="b-text"><h3>Resumen ejecutivo del mes</h3><p>Una hoja con lo esencial de ' + monthLabel(currentMonthKey) + ': facturación, avance de meta, top clientes y asesor destacado — lista para imprimir o compartir.</p></div>' +
+    '<button class="btn-secondary" id="btn-resumen-ejecutivo">Descargar PDF</button>';
+  body.appendChild(resumenBox);
+  document.getElementById('btn-resumen-ejecutivo').onclick = pdfResumenEjecutivo;
+}
+
+function renderRespaldo() {
+  const body = document.getElementById('app-body');
+  body.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = '<h1 class="page-title">Respaldo</h1><p class="page-sub">Tus datos viven solo en este navegador. Descarga una copia para no perderlos, o restaura una anterior.</p>';
+  body.appendChild(header);
+
+  const backupBox = document.createElement('div');
+  backupBox.className = 'backup-box';
+  backupBox.innerHTML =
+    '<div class="b-text"><h3>Copia de seguridad de tus datos</h3><p>Incluye ventas, clientes y tu meta mensual. Guárdala en un lugar seguro (correo, Drive, USB) por si cambias de computadora o se borra el navegador.</p></div>' +
+    '<div class="toolbar-actions">' +
+      '<button class="btn-secondary" id="btn-export-backup">Descargar copia</button>' +
+      '<label class="file-btn">Restaurar copia<input type="file" id="restaurar-backup" accept=".json,application/json"></label>' +
+    '</div>';
+  body.appendChild(backupBox);
+  document.getElementById('btn-export-backup').onclick = exportarBackup;
+  document.getElementById('restaurar-backup').addEventListener('change', restaurarBackup);
+
+  const accesoBox = document.createElement('div');
+  accesoBox.className = 'backup-box';
+  accesoBox.style.marginTop = '14px';
+  accesoBox.innerHTML =
+    '<div class="b-text"><h3>Acceso al sistema</h3><p>Cambia tu DNI o tu clave de ingreso, o quita el bloqueo de acceso de este navegador.</p></div>' +
+    '<div class="toolbar-actions">' +
+      '<button class="btn-secondary" id="btn-cambiar-clave">Cambiar DNI / clave</button>' +
+      '<button class="btn-secondary" id="btn-quitar-acceso">Quitar bloqueo de acceso</button>' +
+    '</div>';
+  body.appendChild(accesoBox);
+  document.getElementById('btn-cambiar-clave').onclick = () => mostrarAuth('setup', true);
+  document.getElementById('btn-quitar-acceso').onclick = () => {
+    if (confirm('Esto quitará el pedido de DNI y clave al abrir el archivo. ¿Continuar?')) {
+      localStorage.removeItem('fg:auth');
+      alert('Se quitó el bloqueo de acceso.');
+    }
+  };
+}
+
+function exportarBackup() {
+  const backup = { tipo: 'fg-backup', version: 2, fecha: new Date().toISOString(), ventas, clientes, meta, gastos };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fg-copia-seguridad_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function restaurarBackup(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data || !Array.isArray(data.ventas) || !Array.isArray(data.clientes)) {
+      alert('El archivo no parece ser una copia de seguridad válida.');
+      ev.target.value = '';
+      return;
+    }
+    const confirmado = confirm('Esto reemplazará todos tus datos actuales (ventas, clientes y meta) con los de esta copia de seguridad del ' + (data.fecha ? new Date(data.fecha).toLocaleString('es-PE') : '') + '. ¿Continuar?');
+    if (!confirmado) { ev.target.value = ''; return; }
+    ventas = data.ventas;
+    clientes = data.clientes;
+    meta = Number(data.meta) || 0;
+    gastos = Array.isArray(data.gastos) ? data.gastos : [];
+    await saveVentas();
+    await saveClientes();
+    await saveMeta();
+    await saveGastos();
+    refreshListas();
+    ev.target.value = '';
+    render();
+    alert('Copia de seguridad restaurada correctamente.');
+  } catch (e) {
+    alert('No se pudo leer el archivo. Verifica que sea una copia de seguridad exportada desde este sistema.');
+    ev.target.value = '';
+  }
+}
+
+function renderBitacora() {
+  const body = document.getElementById('app-body');
+  body.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = '<h1 class="page-title">Área comercial</h1><p class="page-sub">Registro único: aquí defines la venta, el cliente y el asesor. La comisión se calcula sola.</p>';
+  body.appendChild(header);
+
+  if (ventas.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>Todavía no registraste ninguna venta.</p>';
+    const btn = document.createElement('button');
+    btn.className = 'btn-add';
+    btn.textContent = 'Registrar la primera venta';
+    btn.onclick = () => openModal();
+    empty.appendChild(btn);
+    body.appendChild(empty);
+    return;
+  }
+
+  const keys = [...new Set(ventas.map(v => monthKey(v.fecha)))].sort().reverse();
+  if (!currentMonthKey || !keys.includes(currentMonthKey)) currentMonthKey = keys[0];
+
+  const toggle = document.createElement('div');
+  toggle.className = 'toggle-igv';
+  toggle.innerHTML =
+    '<button data-mode="con" class="' + (viewMode==='con'?'active':'') + '">Ver con IGV</button>' +
+    '<button data-mode="sin" class="' + (viewMode==='sin'?'active':'') + '">Ver sin IGV</button>';
+  toggle.querySelectorAll('button').forEach(b => b.onclick = () => { viewMode = b.dataset.mode; render(); });
+  body.appendChild(toggle);
+
+  const rail = document.createElement('div');
+  rail.className = 'month-rail';
+  keys.forEach(k => {
+    const pill = document.createElement('button');
+    pill.className = 'month-pill' + (k === currentMonthKey ? ' active' : '');
+    pill.textContent = monthLabel(k);
+    pill.onclick = () => { currentMonthKey = k; render(); };
+    rail.appendChild(pill);
+  });
+  body.appendChild(rail);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const monthTitle = monthLabel(currentMonthKey);
+  toolbar.innerHTML = '<h2>' + monthTitle[0].toUpperCase() + monthTitle.slice(1) + '</h2>';
+  const actions = document.createElement('div');
+  actions.className = 'toolbar-actions';
+  const repMesBtn = document.createElement('button');
+  repMesBtn.className = 'btn-secondary';
+  repMesBtn.textContent = 'Reporte del mes';
+  repMesBtn.onclick = () => exportarVentas(ventas.filter(v => monthKey(v.fecha) === currentMonthKey), 'ventas_' + currentMonthKey + '.csv');
+  actions.appendChild(repMesBtn);
+  const repAnioBtn = document.createElement('button');
+  repAnioBtn.className = 'btn-secondary';
+  repAnioBtn.textContent = 'Reporte del año';
+  repAnioBtn.onclick = () => exportarVentas(ventas.filter(v => v.fecha.startsWith(currentMonthKey.slice(0,4))), 'ventas_' + currentMonthKey.slice(0,4) + '.csv');
+  actions.appendChild(repAnioBtn);
+  const pdfMesBtn = document.createElement('button');
+  pdfMesBtn.className = 'btn-secondary';
+  pdfMesBtn.textContent = 'PDF del mes';
+  pdfMesBtn.onclick = () => pdfVentas(ventas.filter(v => monthKey(v.fecha) === currentMonthKey), 'Ventas — ' + monthLabel(currentMonthKey), 'Flores & Gonzales Asociados Perú S.A.C.');
+  actions.appendChild(pdfMesBtn);
+  const pdfAnioBtn = document.createElement('button');
+  pdfAnioBtn.className = 'btn-secondary';
+  pdfAnioBtn.textContent = 'PDF del año';
+  pdfAnioBtn.onclick = () => pdfVentas(ventas.filter(v => v.fecha.startsWith(currentMonthKey.slice(0,4))), 'Ventas — Acumulado ' + currentMonthKey.slice(0,4), 'Flores & Gonzales Asociados Perú S.A.C.');
+  actions.appendChild(pdfAnioBtn);
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add';
+  addBtn.textContent = '+ Registrar venta';
+  addBtn.onclick = () => openModal();
+  actions.appendChild(addBtn);
+  toolbar.appendChild(actions);
+  body.appendChild(toolbar);
+
+  const filtersRow = document.createElement('div');
+  filtersRow.className = 'filters-row';
+  filtersRow.innerHTML =
+    '<input type="text" id="f-search" placeholder="Buscar por empresa, RUC, servicio o asesor" value="' + searchTerm.replace(/"/g,'&quot;') + '">' +
+    '<select id="f-filter-estado">' +
+      '<option value="todos"' + (filterEstado==='todos'?' selected':'') + '>Todos los estados</option>' +
+      '<option value="cobrado"' + (filterEstado==='cobrado'?' selected':'') + '>Cobrado</option>' +
+      '<option value="pendiente"' + (filterEstado==='pendiente'?' selected':'') + '>Pendiente</option>' +
+    '</select>';
+  body.appendChild(filtersRow);
+  document.getElementById('f-search').addEventListener('input', (e) => { searchTerm = e.target.value; renderBitacoraList(); });
+  document.getElementById('f-filter-estado').addEventListener('change', (e) => { filterEstado = e.target.value; renderBitacoraList(); });
+
+  const list = document.createElement('div');
+  list.className = 'list';
+  list.id = 'bitacora-list';
+  body.appendChild(list);
+
+  renderBitacoraList();
+}
+
+function renderBitacoraList() {
+  const list = document.getElementById('bitacora-list');
+  if (!list) return;
+  list.innerHTML = '';
+
+  let monthItems = ventas.filter(v => monthKey(v.fecha) === currentMonthKey);
+  if (filterEstado !== 'todos') monthItems = monthItems.filter(v => v.estado === filterEstado);
+  if (searchTerm.trim()) {
+    const q = searchTerm.trim().toLowerCase();
+    monthItems = monthItems.filter(v =>
+      (v.cliente || '').toLowerCase().includes(q) ||
+      (v.ruc || '').toLowerCase().includes(q) ||
+      (v.desc || v.servicio || '').toLowerCase().includes(q) ||
+      (v.asesor || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (monthItems.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>No hay ventas que coincidan con el filtro.</p>';
+    list.appendChild(empty);
+    return;
+  }
+
+  const sorted = monthItems.slice().sort((a,b) => b.fecha.localeCompare(a.fecha));
+  sorted.forEach(v => {
+    const monto = viewMode === 'sin' ? sinIGV(Number(v.monto)) : Number(v.monto);
+    const card = document.createElement('div');
+    card.className = 'card ' + v.estado;
+    const fechaFmt = new Date(v.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+    const metaLine = [v.ruc ? 'RUC ' + escapeHtml(v.ruc) : null, v.contacto ? escapeHtml(v.contacto) : null].filter(Boolean).join(' · ');
+    card.innerHTML =
+      '<div class="card-main">' +
+        '<div class="servicio-badge">' + escapeHtml(v.servicio || 'Otro') + '</div>' +
+        '<div class="card-row1"><span class="card-cliente">' + escapeHtml(v.cliente) + '</span><span class="card-fecha">' + fechaFmt + '</span><span class="canal-badge">' + (v.asesor ? 'Asesor: ' + escapeHtml(v.asesor) : 'Directo') + '</span></div>' +
+        (metaLine ? '<p class="card-empresa-meta">' + metaLine + '</p>' : '') +
+      '</div>' +
+      '<div class="card-side">' +
+        '<div class="card-monto">' + fmtCurrency(monto, v.moneda) + '</div>' +
+        '<div class="card-monto-sub">' + (viewMode==='sin' ? 'sin IGV' : 'con IGV') + '</div>' +
+        (v.asesor ? '<div class="card-monto-sub">neta FG: ' + fmtCurrency(utilidadNetaDe(v), v.moneda) + '</div>' : '') +
+        '<span class="status-badge ' + v.estado + '">' + (v.estado==='cobrado' ? 'Cobrado' : 'Pendiente') + '</span>' +
+        '<div class="card-actions"><button class="icon-btn" data-edit="' + v.id + '">Editar</button><button class="icon-btn" data-del="' + v.id + '">Eliminar</button></div>' +
+      '</div>';
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openModal(b.dataset.edit));
+  list.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteVenta(b.dataset.del));
+}
+
+function renderComisionesReporte() {
+  const body = document.getElementById('app-body');
+  body.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = '<h1 class="page-title">Comisiones</h1><p class="page-sub">Reporte calculado automáticamente a partir de tus ventas — no requiere doble registro.</p>';
+  body.appendChild(header);
+
+  if (ventas.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>Todavía no registraste ninguna venta.</p>';
+    const btn = document.createElement('button');
+    btn.className = 'btn-add';
+    btn.textContent = 'Ir a Área comercial';
+    btn.onclick = () => { currentView = 'bitacora'; render(); };
+    empty.appendChild(btn);
+    body.appendChild(empty);
+    return;
+  }
+
+  const keys = [...new Set(ventas.map(v => monthKey(v.fecha)))].sort().reverse();
+  if (!currentMonthKey || !keys.includes(currentMonthKey)) currentMonthKey = keys[0];
+
+  const info = document.createElement('div');
+  info.className = 'info-box';
+  info.innerHTML = '<span>Estas comisiones se calculan solas a partir de cada venta y su asesor. Para agregar una nueva, regístrala en Área comercial.</span>';
+  const goBtn = document.createElement('button');
+  goBtn.className = 'btn-secondary';
+  goBtn.textContent = 'Ir a Área comercial';
+  goBtn.onclick = () => { currentView = 'bitacora'; render(); };
+  info.appendChild(goBtn);
+  body.appendChild(info);
+
+  const monthItems = ventas.filter(v => monthKey(v.fecha) === currentMonthKey);
+  const flujoMes = flujoComisiones(monthItems);
+
+  const flowBox = document.createElement('div');
+  flowBox.className = 'year-chart';
+  flowBox.innerHTML =
+    '<h3>Flujo de comisiones — ' + monthLabel(currentMonthKey)[0].toUpperCase() + monthLabel(currentMonthKey).slice(1) + (flujoMes.pct !== null ? ' · % utilidad: ' + flujoMes.pct + '%' : '') + '</h3>' +
+    '<div class="stats-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 0;">' +
+      '<div class="stat-card"><div class="lbl">Comisión FG recibida</div><div class="val">' + fmtCurrency(flujoMes.recibidaPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoMes.recibidaUSD,'USD') + '</div></div>' +
+      '<div class="stat-card copper"><div class="lbl">(–) Comisión pagada a asesores</div><div class="val">' + fmtCurrency(flujoMes.pagadaPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoMes.pagadaUSD,'USD') + '</div></div>' +
+      '<div class="stat-card"><div class="lbl">(=) Utilidad neta FG</div><div class="val">' + fmtCurrency(flujoMes.netaPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoMes.netaUSD,'USD') + '</div></div>' +
+    '</div>';
+  body.appendChild(flowBox);
+
+  const yearPrefix = currentMonthKey.slice(0,4);
+  const yearItems = ventas.filter(v => v.fecha.startsWith(yearPrefix));
+  const flujoAnio = flujoComisiones(yearItems);
+
+  const flowBoxYear = document.createElement('div');
+  flowBoxYear.className = 'year-chart';
+  flowBoxYear.innerHTML =
+    '<h3>Flujo de comisiones — Acumulado ' + yearPrefix + (flujoAnio.pct !== null ? ' · % utilidad: ' + flujoAnio.pct + '%' : '') + '</h3>' +
+    '<div class="stats-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 0;">' +
+      '<div class="stat-card"><div class="lbl">Comisión FG recibida</div><div class="val">' + fmtCurrency(flujoAnio.recibidaPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoAnio.recibidaUSD,'USD') + '</div></div>' +
+      '<div class="stat-card copper"><div class="lbl">(–) Comisión pagada a asesores</div><div class="val">' + fmtCurrency(flujoAnio.pagadaPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoAnio.pagadaUSD,'USD') + '</div></div>' +
+      '<div class="stat-card"><div class="lbl">(=) Utilidad neta FG</div><div class="val">' + fmtCurrency(flujoAnio.netaPEN,'PEN') + '</div><div class="lbl" style="margin-top:6px;">' + fmtCurrency(flujoAnio.netaUSD,'USD') + '</div></div>' +
+    '</div>';
+  body.appendChild(flowBoxYear);
+
+  const ranking = rankingAsesores(yearPrefix);
+  if (ranking.length > 0) {
+    const rankBox = document.createElement('div');
+    rankBox.className = 'year-chart';
+    rankBox.innerHTML = '<h3>Ranking de asesores — ' + yearPrefix + '</h3>';
+    ranking.forEach(([asesor, v]) => {
+      const row = document.createElement('div');
+      row.className = 'servicio-row';
+      row.innerHTML =
+        '<div><span class="s-name">' + escapeHtml(asesor) + '</span><span class="s-count">' + v.count + (v.count === 1 ? ' venta referida' : ' ventas referidas') + '</span></div>' +
+        '<div class="s-amounts"><div>' + fmtCurrency(v.pagadoPEN, 'PEN') + (v.pagadoUSD > 0 ? ' · ' + fmtCurrency(v.pagadoUSD,'USD') : '') + '</div><div class="s-usd">pagado de ' + fmtCurrency(v.generadoPEN,'PEN') + (v.generadoUSD > 0 ? ' · ' + fmtCurrency(v.generadoUSD,'USD') : '') + ' generado</div></div>';
+      rankBox.appendChild(row);
+    });
+    body.appendChild(rankBox);
+  }
+
+  const ventasMes = monthItems.length;
+  const ventasPrevMes = ventas.filter(v => monthKey(v.fecha) === prevMonthKey(currentMonthKey)).length;
+  const pendientesAsesor = comisionesAsesoresPendientes(currentMonthKey);
+
+  const miniRow = document.createElement('div');
+  miniRow.className = 'mini-stats-row';
+  miniRow.innerHTML =
+    '<div class="mini-stat gold"><div class="m-lbl">Ventas registradas este mes</div><div class="m-val">' + ventasMes + '</div><div class="m-sub">' + ventasPrevMes + ' el mes anterior</div></div>' +
+    '<div class="mini-stat rust"><div class="m-lbl">Comisiones de asesores pendientes</div>' +
+      '<div class="m-val">' + fmtCurrency(pendientesAsesor.usd.total, 'USD') + '</div>' +
+      '<div class="m-sub">' + pendientesAsesor.usd.count + (pendientesAsesor.usd.count === 1 ? ' comisión por pagar en dólares' : ' comisiones por pagar en dólares') + '</div>' +
+      '<div class="m-val">' + fmtCurrency(pendientesAsesor.pen.total, 'PEN') + '</div>' +
+      '<div class="m-sub">' + pendientesAsesor.pen.count + (pendientesAsesor.pen.count === 1 ? ' comisión por pagar' : ' comisiones por pagar') + '</div>' +
+      '<button class="m-detail" id="btn-ver-pendientes">Ver detalle</button></div>';
+  body.appendChild(miniRow);
+  document.getElementById('btn-ver-pendientes').onclick = () => { comisionesTab = 'pagar'; render(); };
+
+  const rail = document.createElement('div');
+  rail.className = 'month-rail';
+  keys.forEach(k => {
+    const pill = document.createElement('button');
+    pill.className = 'month-pill' + (k === currentMonthKey ? ' active' : '');
+    pill.textContent = monthLabel(k);
+    pill.onclick = () => { currentMonthKey = k; render(); };
+    rail.appendChild(pill);
+  });
+  body.appendChild(rail);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  toolbar.innerHTML = '<h2>Detalle de comisiones</h2>';
+  const actions = document.createElement('div');
+  actions.className = 'toolbar-actions';
+  const repMesBtn = document.createElement('button');
+  repMesBtn.className = 'btn-secondary';
+  repMesBtn.textContent = 'Reporte del mes';
+  repMesBtn.onclick = () => exportarComisiones(ventas.filter(v => monthKey(v.fecha) === currentMonthKey), 'comisiones_' + currentMonthKey + '.csv');
+  actions.appendChild(repMesBtn);
+  const repAnioBtn = document.createElement('button');
+  repAnioBtn.className = 'btn-secondary';
+  repAnioBtn.textContent = 'Reporte del año';
+  repAnioBtn.onclick = () => exportarComisiones(ventas.filter(v => v.fecha.startsWith(currentMonthKey.slice(0,4))), 'comisiones_' + currentMonthKey.slice(0,4) + '.csv');
+  actions.appendChild(repAnioBtn);
+  const pdfMesBtn = document.createElement('button');
+  pdfMesBtn.className = 'btn-secondary';
+  pdfMesBtn.textContent = 'PDF del mes';
+  pdfMesBtn.onclick = () => pdfComisiones(ventas.filter(v => monthKey(v.fecha) === currentMonthKey), 'Comisiones — ' + monthLabel(currentMonthKey), 'Flores & Gonzales Asociados Perú S.A.C.');
+  actions.appendChild(pdfMesBtn);
+  const pdfAnioBtn = document.createElement('button');
+  pdfAnioBtn.className = 'btn-secondary';
+  pdfAnioBtn.textContent = 'PDF del año';
+  pdfAnioBtn.onclick = () => pdfComisiones(ventas.filter(v => v.fecha.startsWith(currentMonthKey.slice(0,4))), 'Comisiones — Acumulado ' + currentMonthKey.slice(0,4), 'Flores & Gonzales Asociados Perú S.A.C.');
+  actions.appendChild(pdfAnioBtn);
+  toolbar.appendChild(actions);
+  body.appendChild(toolbar);
+
+  const tabToggle = document.createElement('div');
+  tabToggle.className = 'toggle-igv';
+  tabToggle.innerHTML =
+    '<button data-tab="cobrar" class="' + (comisionesTab==='cobrar'?'active':'') + '">Por cobrar</button>' +
+    '<button data-tab="pagar" class="' + (comisionesTab==='pagar'?'active':'') + '">Por pagar a asesores</button>';
+  tabToggle.querySelectorAll('button').forEach(b => b.onclick = () => { comisionesTab = b.dataset.tab; render(); });
+  body.appendChild(tabToggle);
+
+  const filtersRow = document.createElement('div');
+  filtersRow.className = 'filters-row';
+  filtersRow.innerHTML = '<input type="text" id="c-search" placeholder="Buscar por cliente o asesor" value="' + searchTermComision.replace(/"/g,'&quot;') + '">';
+  body.appendChild(filtersRow);
+  document.getElementById('c-search').addEventListener('input', (e) => { searchTermComision = e.target.value; renderComisionesList(); });
+
+  const list = document.createElement('div');
+  list.className = 'list';
+  list.id = 'comisiones-list';
+  body.appendChild(list);
+
+  renderComisionesList();
+}
+
+function renderComisionesList() {
+  const list = document.getElementById('comisiones-list');
+  if (!list) return;
+  list.innerHTML = '';
+
+  let items = ventas.filter(v => monthKey(v.fecha) === currentMonthKey);
+  if (comisionesTab === 'cobrar') {
+    items = items.filter(v => v.estado === 'pendiente');
+  } else {
+    items = items.filter(v => v.asesor && !v.asesorPagado);
+  }
+  if (searchTermComision.trim()) {
+    const q = searchTermComision.trim().toLowerCase();
+    items = items.filter(v => (v.cliente || '').toLowerCase().includes(q) || (v.asesor || '').toLowerCase().includes(q));
+  }
+
+  if (items.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>' + (comisionesTab === 'cobrar' ? 'No tienes comisiones pendientes por cobrar este mes.' : 'No tienes comisiones pendientes por pagar a asesores este mes.') + '</p>';
+    list.appendChild(empty);
+    return;
+  }
+
+  const sorted = items.slice().sort((a,b) => b.fecha.localeCompare(a.fecha));
+  sorted.forEach(v => {
+    const recibida = comisionRecibidaDe(v);
+    const pagada = comisionPagadaDe(v);
+    const neta = recibida - pagada;
+    const fechaFmt = new Date(v.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+    const card = document.createElement('div');
+    card.className = 'card pendiente';
+
+    if (comisionesTab === 'cobrar') {
+      card.innerHTML =
+        '<div class="card-main">' +
+          '<div class="servicio-badge">' + escapeHtml(v.servicio || 'Otro') + '</div>' +
+          '<div class="card-row1"><span class="card-cliente">' + escapeHtml(v.cliente) + '</span><span class="card-fecha">' + fechaFmt + '</span></div>' +
+          '<p class="card-desc">Comisión por cobrar de este cliente.</p>' +
+        '</div>' +
+        '<div class="card-side">' +
+          '<div class="card-monto">' + fmtCurrency(recibida, v.moneda) + '</div>' +
+          '<span class="status-badge pendiente">Pendiente</span>' +
+          '<button class="icon-btn" data-cobrado="' + v.id + '">Marcar como cobrado</button>' +
+        '</div>';
+    } else {
+      card.innerHTML =
+        '<div class="card-main">' +
+          '<div class="servicio-badge">' + escapeHtml(v.servicio || 'Otro') + '</div>' +
+          '<div class="card-row1"><span class="card-cliente">' + escapeHtml(v.cliente) + '</span><span class="card-fecha">' + fechaFmt + '</span><span class="canal-badge">Asesor: ' + escapeHtml(v.asesor) + '</span></div>' +
+          '<p class="card-desc">Utilidad neta FG si se paga: ' + fmtCurrency(neta, v.moneda) + '</p>' +
+        '</div>' +
+        '<div class="card-side">' +
+          '<div class="card-monto">' + fmtCurrency(pagada, v.moneda) + '</div>' +
+          '<span class="status-badge pendiente">Por pagar</span>' +
+          '<button class="icon-btn" data-pagado="' + v.id + '">Marcar como pagado</button>' +
+        '</div>';
+    }
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('[data-cobrado]').forEach(b => b.onclick = async () => {
+    const v = ventas.find(x => x.id === b.dataset.cobrado);
+    v.estado = 'cobrado';
+    await saveVentas();
+    render();
+  });
+  list.querySelectorAll('[data-pagado]').forEach(b => b.onclick = async () => {
+    const v = ventas.find(x => x.id === b.dataset.pagado);
+    v.asesorPagado = true;
+    await saveVentas();
+    render();
+  });
+}
+
+function totalGastosMes(key) {
+  const items = gastos.filter(g => monthKey(g.fecha) === key);
+  return {
+    count: items.length,
+    PEN: items.filter(g => g.moneda === 'PEN').reduce((a,g) => a + Number(g.monto), 0),
+    USD: items.filter(g => g.moneda === 'USD').reduce((a,g) => a + Number(g.monto), 0)
+  };
+}
+
+function renderGastos() {
+  const body = document.getElementById('app-body');
+  body.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = '<h1 class="page-title">Gastos</h1><p class="page-sub">Gastos operativos del negocio, para conocer tu rentabilidad real más allá de la comisión.</p>';
+  body.appendChild(header);
+
+  if (gastos.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>Todavía no registraste ningún gasto.</p>';
+    const btn = document.createElement('button');
+    btn.className = 'btn-add';
+    btn.textContent = 'Registrar el primer gasto';
+    btn.onclick = () => openGastoModal();
+    empty.appendChild(btn);
+    body.appendChild(empty);
+    return;
+  }
+
+  const keys = [...new Set(gastos.map(g => monthKey(g.fecha)))].sort().reverse();
+  if (!currentMonthKey || !keys.includes(currentMonthKey)) currentMonthKey = keys[0];
+
+  const totales = totalGastosMes(currentMonthKey);
+  const statsRow = document.createElement('div');
+  statsRow.className = 'stats-row';
+  statsRow.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  statsRow.innerHTML =
+    '<div class="stat-card"><div class="lbl">Gastos registrados</div><div class="val">' + totales.count + '</div></div>' +
+    '<div class="stat-card copper"><div class="lbl">Total del mes (S/)</div><div class="val">' + fmtCurrency(totales.PEN,'PEN') + '</div></div>' +
+    '<div class="stat-card"><div class="lbl">Total del mes (US$)</div><div class="val">' + fmtCurrency(totales.USD,'USD') + '</div></div>';
+  body.appendChild(statsRow);
+
+  const porCategoria = {};
+  gastos.filter(g => monthKey(g.fecha) === currentMonthKey).forEach(g => {
+    if (!porCategoria[g.categoria]) porCategoria[g.categoria] = { PEN: 0, USD: 0 };
+    porCategoria[g.categoria][g.moneda] += Number(g.monto);
+  });
+  const catEntries = Object.entries(porCategoria).sort((a,b) => (b[1].PEN+b[1].USD)-(a[1].PEN+a[1].USD));
+  if (catEntries.length > 0) {
+    const catBox = document.createElement('div');
+    catBox.className = 'year-chart';
+    catBox.innerHTML = '<h3>Gastos por categoría</h3>';
+    catEntries.forEach(([cat, v]) => {
+      const row = document.createElement('div');
+      row.className = 'servicio-row';
+      row.innerHTML = '<span class="s-name">' + escapeHtml(cat) + '</span><div class="s-amounts"><div>' + fmtCurrency(v.PEN,'PEN') + (v.USD>0?' · '+fmtCurrency(v.USD,'USD'):'') + '</div></div>';
+      catBox.appendChild(row);
+    });
+    body.appendChild(catBox);
+  }
+
+  const rail = document.createElement('div');
+  rail.className = 'month-rail';
+  keys.forEach(k => {
+    const pill = document.createElement('button');
+    pill.className = 'month-pill' + (k === currentMonthKey ? ' active' : '');
+    pill.textContent = monthLabel(k);
+    pill.onclick = () => { currentMonthKey = k; render(); };
+    rail.appendChild(pill);
+  });
+  body.appendChild(rail);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const monthTitle = monthLabel(currentMonthKey);
+  toolbar.innerHTML = '<h2>' + monthTitle[0].toUpperCase() + monthTitle.slice(1) + '</h2>';
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add';
+  addBtn.textContent = '+ Registrar gasto';
+  addBtn.onclick = () => openGastoModal();
+  toolbar.appendChild(addBtn);
+  body.appendChild(toolbar);
+
+  const items = gastos.filter(g => monthKey(g.fecha) === currentMonthKey).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  const list = document.createElement('div');
+  list.className = 'list';
+  items.forEach(g => {
+    const fechaFmt = new Date(g.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="card-main">' +
+        '<div class="servicio-badge">' + escapeHtml(g.categoria) + '</div>' +
+        '<div class="card-row1"><span class="card-cliente">' + escapeHtml(g.concepto) + '</span><span class="card-fecha">' + fechaFmt + '</span></div>' +
+      '</div>' +
+      '<div class="card-side">' +
+        '<div class="card-monto">' + fmtCurrency(Number(g.monto), g.moneda) + '</div>' +
+        '<div class="card-actions"><button class="icon-btn" data-edit="' + g.id + '">Editar</button><button class="icon-btn" data-del="' + g.id + '">Eliminar</button></div>' +
+      '</div>';
+    list.appendChild(card);
+  });
+  body.appendChild(list);
+
+  list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openGastoModal(b.dataset.edit));
+  list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    gastos = gastos.filter(g => g.id !== b.dataset.del);
+    await saveGastos();
+    render();
+  });
+}
+
+function openGastoModal(id) {
+  document.getElementById('modal-gasto-title').textContent = id ? 'Editar gasto' : 'Nuevo gasto';
+  document.getElementById('err-g-concepto').classList.remove('show');
+  document.getElementById('err-g-monto').classList.remove('show');
+  document.getElementById('form-gasto').dataset.editing = id || '';
+  if (id) {
+    const g = gastos.find(x => x.id === id);
+    document.getElementById('g-fecha').value = g.fecha;
+    document.getElementById('g-categoria').value = g.categoria;
+    document.getElementById('g-concepto').value = g.concepto;
+    document.getElementById('g-moneda').value = g.moneda;
+    document.getElementById('g-monto').value = g.monto;
+  } else {
+    document.getElementById('form-gasto').reset();
+    document.getElementById('g-fecha').value = new Date().toISOString().slice(0,10);
+  }
+  document.getElementById('overlay-gasto').classList.add('show');
+}
+function closeGastoModal() { document.getElementById('overlay-gasto').classList.remove('show'); }
+
+document.getElementById('btn-cancel-gasto').onclick = closeGastoModal;
+document.getElementById('overlay-gasto').addEventListener('click', (ev) => { if (ev.target.id === 'overlay-gasto') closeGastoModal(); });
+
+document.getElementById('form-gasto').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const concepto = document.getElementById('g-concepto').value.trim();
+  const montoRaw = document.getElementById('g-monto').value;
+  let valid = true;
+  if (!concepto) { document.getElementById('err-g-concepto').classList.add('show'); valid = false; }
+  else document.getElementById('err-g-concepto').classList.remove('show');
+  if (!montoRaw || Number(montoRaw) <= 0) { document.getElementById('err-g-monto').classList.add('show'); valid = false; }
+  else document.getElementById('err-g-monto').classList.remove('show');
+  if (!valid) return;
+
+  const data = {
+    fecha: document.getElementById('g-fecha').value,
+    categoria: document.getElementById('g-categoria').value,
+    concepto: concepto,
+    moneda: document.getElementById('g-moneda').value,
+    monto: Number(montoRaw)
+  };
+  const editing = document.getElementById('form-gasto').dataset.editing;
+  if (editing) {
+    const idx = gastos.findIndex(g => g.id === editing);
+    gastos[idx] = { ...gastos[idx], ...data };
+  } else {
+    gastos.push({ id: 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), ...data });
+  }
+  await saveGastos();
+  currentMonthKey = monthKey(data.fecha);
+  closeGastoModal();
+  render();
+});
+
+function renderClientes() {
+  const body = document.getElementById('app-body');
+  body.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = '<h1 class="page-title">Clientes</h1><p class="page-sub">Base de empresas y personas a las que les brindas asesoría. Se usan para autocompletar tus ventas.</p>';
+  body.appendChild(header);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  toolbar.innerHTML = '<h2>' + clientes.length + (clientes.length === 1 ? ' cliente registrado' : ' clientes registrados') + '</h2>';
+  const actions = document.createElement('div');
+  actions.className = 'toolbar-actions';
+  actions.innerHTML = '<label class="file-btn">Cargar CSV masivo<input type="file" id="csv-clientes" accept=".csv,text/csv"></label>';
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add';
+  addBtn.textContent = '+ Nuevo cliente';
+  addBtn.onclick = () => openClienteModal();
+  actions.appendChild(addBtn);
+  toolbar.appendChild(actions);
+  body.appendChild(toolbar);
+
+  const note = document.createElement('p');
+  note.className = 'import-note';
+  note.textContent = 'El CSV debe tener columnas: razón social, RUC/DNI, contacto (una fila por cliente).';
+  body.appendChild(note);
+
+  document.getElementById('csv-clientes').addEventListener('change', async (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    const nuevos = parseClientesCSV(text);
+    let agregados = 0;
+    nuevos.forEach(n => {
+      if (!clientes.some(c => c.razon.toLowerCase() === n.razon.toLowerCase())) {
+        clientes.push({ id: 'cl_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), ...n });
+        agregados++;
+      }
+    });
+    await saveClientes();
+    refreshListas();
+    render();
+    ev.target.value = '';
+    alert(agregados + ' cliente(s) importado(s). ' + (nuevos.length - agregados) + ' ya existían y se omitieron.');
+  });
+
+  if (clientes.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>Todavía no registraste clientes.</p>';
+    body.appendChild(empty);
+    return;
+  }
+
+  const list = document.createElement('div');
+  list.className = 'list';
+  clientes.slice().sort((a,b) => a.razon.localeCompare(b.razon)).forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'cliente-row';
+    const metaLine = [
+      c.ruc ? 'RUC ' + escapeHtml(c.ruc) : null,
+      c.giro ? escapeHtml(c.giro) : null,
+      c.contacto ? escapeHtml(c.contacto) : null,
+      c.celular ? escapeHtml(c.celular) : null,
+      c.correo ? escapeHtml(c.correo) : null
+    ].filter(Boolean).join(' · ');
+    row.innerHTML =
+      '<div><div class="cl-name">' + escapeHtml(c.razon) + '</div>' + (metaLine ? '<div class="cl-meta">' + metaLine + '</div>' : '') + '</div>' +
+      '<div class="card-actions"><button class="icon-btn" data-hist="' + c.id + '">Ver historial</button><button class="icon-btn" data-edit="' + c.id + '">Editar</button><button class="icon-btn" data-del="' + c.id + '">Eliminar</button></div>';
+    list.appendChild(row);
+  });
+  body.appendChild(list);
+
+  list.querySelectorAll('[data-hist]').forEach(b => b.onclick = () => {
+    const c = clientes.find(x => x.id === b.dataset.hist);
+    selectedClienteRazon = c.razon;
+    currentView = 'historial-cliente';
+    render();
+  });
+  list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openClienteModal(b.dataset.edit));
+  list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    clientes = clientes.filter(c => c.id !== b.dataset.del);
+    await saveClientes();
+    refreshListas();
+    render();
+  });
+}
+
+function renderHistorialCliente() {
+  const body = document.getElementById('app-body');
+  body.innerHTML = '';
+
+  const razon = selectedClienteRazon;
+  const header = document.createElement('div');
+  const backBtn = document.createElement('button');
+  backBtn.className = 'btn-secondary';
+  backBtn.textContent = '← Volver a Clientes';
+  backBtn.style.marginBottom = '14px';
+  backBtn.onclick = () => { currentView = 'clientes'; render(); };
+  header.appendChild(backBtn);
+  const titleWrap = document.createElement('div');
+  titleWrap.innerHTML = '<h1 class="page-title">' + escapeHtml(razon) + '</h1><p class="page-sub">Historial completo de ventas con este cliente.</p>';
+  header.appendChild(titleWrap);
+  body.appendChild(header);
+
+  const clienteInfo = clientes.find(c => c.razon === razon);
+  if (clienteInfo) {
+    const campos = [
+      ['RUC / DNI', clienteInfo.ruc],
+      ['Representante legal', clienteInfo.representante],
+      ['Dirección', clienteInfo.direccion],
+      ['Actividad de la empresa', clienteInfo.actividad],
+      ['Giro del negocio', clienteInfo.giro],
+      ['Persona de contacto', clienteInfo.contacto],
+      ['Celular', clienteInfo.celular],
+      ['Correo', clienteInfo.correo]
+    ].filter(([, val]) => val);
+    if (campos.length > 0) {
+      const infoBox = document.createElement('div');
+      infoBox.className = 'year-chart';
+      infoBox.innerHTML = '<h3>Datos del cliente</h3>' + campos.map(([lbl, val]) =>
+        '<div class="servicio-row"><span class="s-name">' + lbl + '</span><span>' + escapeHtml(val) + '</span></div>'
+      ).join('');
+      body.appendChild(infoBox);
+    }
+  }
+
+  const items = ventas.filter(v => v.cliente === razon).sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  if (items.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>Todavía no le registraste ninguna venta a este cliente.</p>';
+    body.appendChild(empty);
+    return;
+  }
+
+  const totalPEN = items.filter(v => v.moneda === 'PEN').reduce((a,v) => a + Number(v.monto), 0);
+  const totalUSD = items.filter(v => v.moneda === 'USD').reduce((a,v) => a + Number(v.monto), 0);
+  const meses = new Set(items.map(v => monthKey(v.fecha))).size;
+
+  const statsRow = document.createElement('div');
+  statsRow.className = 'stats-row';
+  statsRow.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  statsRow.innerHTML =
+    '<div class="stat-card"><div class="lbl">Ventas registradas</div><div class="val">' + items.length + '</div></div>' +
+    '<div class="stat-card"><div class="lbl">Total facturado (S/)</div><div class="val">' + fmtCurrency(totalPEN, 'PEN') + '</div></div>' +
+    '<div class="stat-card copper"><div class="lbl">Meses con actividad</div><div class="val">' + meses + '</div></div>';
+  body.appendChild(statsRow);
+  if (totalUSD > 0) {
+    const usdNote = document.createElement('p');
+    usdNote.className = 'import-note';
+    usdNote.textContent = 'También facturado en dólares: ' + fmtCurrency(totalUSD, 'USD');
+    body.appendChild(usdNote);
+  }
+
+  const list = document.createElement('div');
+  list.className = 'list';
+  items.forEach(v => {
+    const fechaFmt = new Date(v.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+    const card = document.createElement('div');
+    card.className = 'card ' + v.estado;
+    card.innerHTML =
+      '<div class="card-main">' +
+        '<div class="servicio-badge">' + escapeHtml(v.servicio || 'Otro') + '</div>' +
+        '<div class="card-row1"><span class="card-fecha">' + fechaFmt + '</span><span class="canal-badge">' + (v.asesor ? 'Asesor: ' + escapeHtml(v.asesor) : 'Directo') + '</span></div>' +
+      '</div>' +
+      '<div class="card-side">' +
+        '<div class="card-monto">' + fmtCurrency(Number(v.monto), v.moneda) + '</div>' +
+        '<span class="status-badge ' + v.estado + '">' + (v.estado==='cobrado' ? 'Cobrado' : 'Pendiente') + '</span>' +
+      '</div>';
+    list.appendChild(card);
+  });
+  body.appendChild(list);
+}
+
+function openClienteModal(id) {
+  document.getElementById('modal-cliente-title').textContent = id ? 'Editar cliente' : 'Nuevo cliente';
+  document.getElementById('err-cl-razon').classList.remove('show');
+  document.getElementById('form-cliente').dataset.editing = id || '';
+  if (id) {
+    const c = clientes.find(x => x.id === id);
+    document.getElementById('cl-razon').value = c.razon;
+    document.getElementById('cl-ruc').value = c.ruc || '';
+    document.getElementById('cl-representante').value = c.representante || '';
+    document.getElementById('cl-direccion').value = c.direccion || '';
+    document.getElementById('cl-actividad').value = c.actividad || '';
+    document.getElementById('cl-giro').value = c.giro || '';
+    document.getElementById('cl-contacto').value = c.contacto || '';
+    document.getElementById('cl-celular').value = c.celular || '';
+    document.getElementById('cl-correo').value = c.correo || '';
+  } else {
+    document.getElementById('form-cliente').reset();
+  }
+  document.getElementById('overlay-cliente').classList.add('show');
+}
+function closeClienteModal() { document.getElementById('overlay-cliente').classList.remove('show'); }
+
+document.getElementById('btn-cancel-cliente').onclick = closeClienteModal;
+document.getElementById('overlay-cliente').addEventListener('click', (ev) => { if (ev.target.id === 'overlay-cliente') closeClienteModal(); });
+
+document.getElementById('form-cliente').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const razon = document.getElementById('cl-razon').value.trim();
+  if (!razon) { document.getElementById('err-cl-razon').classList.add('show'); return; }
+  document.getElementById('err-cl-razon').classList.remove('show');
+  const data = {
+    razon: razon,
+    ruc: document.getElementById('cl-ruc').value.trim(),
+    representante: document.getElementById('cl-representante').value.trim(),
+    direccion: document.getElementById('cl-direccion').value.trim(),
+    actividad: document.getElementById('cl-actividad').value.trim(),
+    giro: document.getElementById('cl-giro').value.trim(),
+    contacto: document.getElementById('cl-contacto').value.trim(),
+    celular: document.getElementById('cl-celular').value.trim(),
+    correo: document.getElementById('cl-correo').value.trim()
+  };
+  const editing = document.getElementById('form-cliente').dataset.editing;
+  if (editing) {
+    const idx = clientes.findIndex(c => c.id === editing);
+    clientes[idx] = { ...clientes[idx], ...data };
+  } else {
+    clientes.push({ id: 'cl_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), ...data });
+  }
+  await saveClientes();
+  refreshListas();
+  closeClienteModal();
+  render();
+});
+
+function pdfResumenEjecutivo() {
+  const monthItems = ventas.filter(v => monthKey(v.fecha) === currentMonthKey);
+  const totalConIGV = monthItems.reduce((a,v) => a + Number(v.monto), 0);
+  const totalSinIGV = sinIGV(totalConIGV);
+  const crecimiento = crecimientoMensual(currentMonthKey);
+  const flujoMes = flujoComisiones(monthItems);
+  const pendVenta = monthItems.filter(v => v.estado === 'pendiente');
+  const pendVentaTotal = pendVenta.reduce((a,v) => a + Number(v.monto), 0);
+  const pendAsesor = comisionesAsesoresPendientes(currentMonthKey);
+  const gastosMes = totalGastosMes(currentMonthKey);
+  const rentaReal = flujoMes.netaPEN - gastosMes.PEN;
+
+  const porCliente = {};
+  monthItems.forEach(v => { porCliente[v.cliente] = (porCliente[v.cliente] || 0) + Number(v.monto); });
+  const topClientes = Object.entries(porCliente).sort((a,b) => b[1]-a[1]).slice(0,3);
+
+  const porAsesor = {};
+  monthItems.filter(v => v.asesor).forEach(v => { porAsesor[v.asesor] = (porAsesor[v.asesor] || 0) + comisionRecibidaDe(v); });
+  const topAsesorEntry = Object.entries(porAsesor).sort((a,b) => b[1]-a[1])[0];
+
+  const metaHtml = meta > 0
+    ? '<div><strong>Meta del mes:</strong> ' + fmtMoney(meta) + ' — avance ' + Math.round((totalConIGV/meta)*100) + '%</div>'
+    : '<div><strong>Meta del mes:</strong> no definida</div>';
+  const crecHtml = crecimiento.pct === null
+    ? '<div><strong>Crecimiento vs mes anterior:</strong> sin datos de comparación</div>'
+    : '<div><strong>Crecimiento vs mes anterior:</strong> ' + (crecimiento.pct >= 0 ? '+' : '') + crecimiento.pct.toFixed(1) + '%</div>';
+
+  const win = window.open('', '_blank');
+  if (!win) { alert('Tu navegador bloqueó la ventana emergente. Permite ventanas emergentes para descargar el PDF.'); return; }
+  win.document.write(
+    '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Resumen ejecutivo — ' + monthLabel(currentMonthKey) + '</title>' +
+    '<style>' +
+    'body{font-family:Arial,Helvetica,sans-serif;color:#16213D;padding:32px;}' +
+    'h1{font-size:20px;margin:0 0 2px;}' +
+    '.brand{font-size:11px;color:#8B8677;margin-bottom:2px;}' +
+    'p.sub{font-size:12px;color:#4C5878;margin:0 0 20px;}' +
+    '.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}' +
+    '.box{border:1px solid #E3E1DA;border-radius:8px;padding:14px 16px;}' +
+    '.box h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:#8B8677;margin:0 0 8px;}' +
+    '.box div{font-size:13px;margin-bottom:6px;}' +
+    '.big{font-size:22px;font-weight:bold;color:#14213F;}' +
+    'ol{margin:0;padding-left:18px;font-size:13px;}' +
+    '@media print{body{padding:12px;}}' +
+    '</style></head><body>' +
+    '<div class="brand">Flores &amp; Gonzales Asociados Perú S.A.C.</div>' +
+    '<h1>Resumen ejecutivo — ' + monthLabel(currentMonthKey)[0].toUpperCase() + monthLabel(currentMonthKey).slice(1) + '</h1>' +
+    '<p class="sub">Generado el ' + new Date().toLocaleDateString('es-PE') + '</p>' +
+    '<div class="grid">' +
+      '<div class="box"><h3>Facturación del mes</h3><div class="big">' + fmtMoney(totalConIGV) + '</div><div>Sin IGV: ' + fmtMoney(totalSinIGV) + '</div>' + metaHtml + crecHtml + '</div>' +
+      '<div class="box"><h3>Utilidad neta del mes</h3><div class="big">' + fmtCurrency(flujoMes.netaPEN,'PEN') + '</div><div>Sin IGV: ' + fmtCurrency(sinIGV(flujoMes.netaPEN),'PEN') + '</div>' + (flujoMes.netaUSD !== 0 ? '<div>En dólares: ' + fmtCurrency(flujoMes.netaUSD,'USD') + '</div>' : '') + '</div>' +
+      '<div class="box"><h3>Rentabilidad real (– gastos operativos)</h3><div class="big">' + fmtCurrency(rentaReal,'PEN') + '</div><div>Gastos del mes: ' + fmtCurrency(gastosMes.PEN,'PEN') + (gastosMes.USD>0?' · '+fmtCurrency(gastosMes.USD,'USD'):'') + '</div></div>' +
+      '<div class="box"><h3>Top 3 clientes del mes</h3>' + (topClientes.length ? '<ol>' + topClientes.map(([c,v]) => '<li>' + c + ' — ' + fmtMoney(v) + '</li>').join('') + '</ol>' : '<div>Sin ventas este mes.</div>') + '</div>' +
+      '<div class="box"><h3>Asesor destacado</h3>' + (topAsesorEntry ? '<div class="big" style="font-size:16px;">' + topAsesorEntry[0] + '</div><div>Generó ' + fmtMoney(topAsesorEntry[1]) + ' en comisión</div>' : '<div>Sin ventas referidas este mes.</div>') + '</div>' +
+      '<div class="box"><h3>Pendiente por cobrar</h3><div class="big" style="font-size:18px;">' + fmtMoney(pendVentaTotal) + '</div><div>' + pendVenta.length + ' venta(s) sin cobrar</div></div>' +
+      '<div class="box"><h3>Pendiente por pagar a asesores</h3><div class="big" style="font-size:18px;">' + fmtCurrency(pendAsesor.pen.total,'PEN') + '</div><div>' + pendAsesor.pen.count + ' comisión(es) por pagar' + (pendAsesor.usd.count > 0 ? ' · ' + fmtCurrency(pendAsesor.usd.total,'USD') + ' (' + pendAsesor.usd.count + ')' : '') + '</div></div>' +
+    '</div>' +
+    '</body></html>'
+  );
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 350);
+}
+
+function abrirReportePDF(titulo, subtitulo, headers, rows, totalesHtml) {
+  const win = window.open('', '_blank');
+  if (!win) { alert('Tu navegador bloqueó la ventana emergente. Permite ventanas emergentes para descargar el PDF.'); return; }
+  const filas = rows.map(r => '<tr>' + r.map(c => '<td>' + (c == null ? '' : String(c)) + '</td>').join('') + '</tr>').join('');
+  const encabezados = headers.map(h => '<th>' + h + '</th>').join('');
+  win.document.write(
+    '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>' + titulo + '</title>' +
+    '<style>' +
+    'body{font-family:Arial,Helvetica,sans-serif;color:#16213D;padding:32px;}' +
+    'h1{font-size:20px;margin:0 0 2px;}' +
+    '.brand{font-size:11px;color:#8B8677;margin-bottom:2px;}' +
+    'p.sub{font-size:12px;color:#4C5878;margin:0 0 18px;}' +
+    'table{width:100%;border-collapse:collapse;font-size:11.5px;}' +
+    'th{background:#14213F;color:#fff;text-align:left;padding:8px 10px;}' +
+    'td{padding:7px 10px;border-bottom:1px solid #E3E1DA;}' +
+    'tr:nth-child(even) td{background:#FBF9F5;}' +
+    '.totales{margin-top:18px;font-size:13px;}' +
+    '.totales div{margin-bottom:4px;}' +
+    '@media print{body{padding:12px;}}' +
+    '</style></head><body>' +
+    '<div class="brand">Flores &amp; Gonzales Asociados Perú S.A.C.</div>' +
+    '<h1>' + titulo + '</h1>' +
+    '<p class="sub">' + subtitulo + '</p>' +
+    '<table><thead><tr>' + encabezados + '</tr></thead><tbody>' + filas + '</tbody></table>' +
+    '<div class="totales">' + totalesHtml + '</div>' +
+    '</body></html>'
+  );
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 350);
+}
+
+function pdfVentas(items, titulo, subtitulo) {
+  const headers = ['Fecha','Cliente','Servicio','Moneda','Estado','Comisión FG (con IGV)','Asesor','Pagado asesor','Utilidad neta'];
+  const rows = items.slice().sort((a,b) => a.fecha.localeCompare(b.fecha)).map(v => [
+    v.fecha, v.cliente, v.servicio || '', v.moneda, v.estado === 'cobrado' ? 'Cobrado' : 'Pendiente',
+    fmtCurrency(Number(v.monto), v.moneda), v.asesor || 'Directo', fmtCurrency(comisionPagadaDe(v), v.moneda), fmtCurrency(utilidadNetaDe(v), v.moneda)
+  ]);
+  const totalPEN = items.filter(v=>v.moneda==='PEN').reduce((a,v)=>a+Number(v.monto),0);
+  const totalUSD = items.filter(v=>v.moneda==='USD').reduce((a,v)=>a+Number(v.monto),0);
+  const totalesHtml = '<div><strong>Total en soles:</strong> ' + fmtCurrency(totalPEN,'PEN') + '</div><div><strong>Total en dólares:</strong> ' + fmtCurrency(totalUSD,'USD') + '</div><div><strong>Ventas:</strong> ' + items.length + '</div>';
+  abrirReportePDF(titulo, subtitulo, headers, rows, totalesHtml);
+}
+
+function pdfComisiones(items, titulo, subtitulo) {
+  const flujo = flujoComisiones(items);
+  const headers = ['Fecha','Cliente','Servicio','Moneda','Comisión recibida','Asesor','Pagado asesor','Utilidad neta','Estado'];
+  const rows = items.slice().sort((a,b) => a.fecha.localeCompare(b.fecha)).map(v => [
+    v.fecha, v.cliente, v.servicio || '', v.moneda, fmtCurrency(comisionRecibidaDe(v), v.moneda),
+    v.asesor || 'Directo', fmtCurrency(comisionPagadaDe(v), v.moneda), fmtCurrency(utilidadNetaDe(v), v.moneda), v.estado === 'cobrado' ? 'Cobrado' : 'Pendiente'
+  ]);
+  const totalesHtml =
+    '<div><strong>Comisión FG recibida:</strong> ' + fmtCurrency(flujo.recibidaPEN,'PEN') + ' · ' + fmtCurrency(flujo.recibidaUSD,'USD') + '</div>' +
+    '<div><strong>Pagado a asesores:</strong> ' + fmtCurrency(flujo.pagadaPEN,'PEN') + ' · ' + fmtCurrency(flujo.pagadaUSD,'USD') + '</div>' +
+    '<div><strong>Utilidad neta FG:</strong> ' + fmtCurrency(flujo.netaPEN,'PEN') + ' · ' + fmtCurrency(flujo.netaUSD,'USD') + '</div>';
+  abrirReportePDF(titulo, subtitulo, headers, rows, totalesHtml);
+}
+
+function descargarCSV(filename, headers, rows) {
+  const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [headers.map(esc).join(',')].concat(rows.map(r => r.map(esc).join(',')));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportarVentas(items, filename) {
+  const headers = ['Fecha','Cliente','RUC/DNI','Contacto','Servicio','Moneda','Estado','Monto del servicio','Comisión FG (con IGV)','Comisión sin IGV','IGV','Asesor','Comisión pagada asesor','Utilidad neta FG'];
+  const rows = items.map(v => [
+    v.fecha, v.cliente, v.ruc || '', v.contacto || '', v.servicio || '', v.moneda, v.estado,
+    v.montoServicio != null ? Number(v.montoServicio).toFixed(2) : '',
+    Number(v.monto).toFixed(2), sinIGV(v.monto).toFixed(2), igvDe(v.monto).toFixed(2),
+    v.asesor || 'Directo', comisionPagadaDe(v).toFixed(2), utilidadNetaDe(v).toFixed(2)
+  ]);
+  descargarCSV(filename, headers, rows);
+}
+
+function exportarComisiones(items, filename) {
+  const headers = ['Fecha','Cliente','Servicio','Moneda','Comisión recibida (venta)','Asesor','Tipo pago asesor','Valor','Comisión pagada asesor','Utilidad neta FG','Estado'];
+  const rows = items.map(v => [
+    v.fecha, v.cliente, v.servicio || '', v.moneda, comisionRecibidaDe(v).toFixed(2),
+    v.asesor || 'Directo', v.asesor ? (v.asesorTipo === 'porcentaje' ? 'Porcentaje' : 'Fijo') : '', v.asesor ? v.asesorValor : '',
+    comisionPagadaDe(v).toFixed(2), utilidadNetaDe(v).toFixed(2), v.estado
+  ]);
+  descargarCSV(filename, headers, rows);
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function actualizarCamposServicio() {
+  const val = document.getElementById('f-servicio').value;
+  document.getElementById('f-servicio-subtipo-field').style.display = val === 'Asesoría en seguros' ? 'block' : 'none';
+  document.getElementById('f-servicio-otro-field').style.display = val === 'Otro' ? 'block' : 'none';
+}
+
+function etiquetaServicio() {
+  const val = document.getElementById('f-servicio').value;
+  if (val === 'Asesoría en seguros') return 'Asesoría en seguros — ' + document.getElementById('f-servicio-subtipo').value;
+  if (val === 'Otro') return document.getElementById('f-servicio-otro').value.trim() || 'Otro';
+  return val;
+}
+
+function calcularComisionFG() {
+  const montoServicio = Number(document.getElementById('f-monto-servicio').value) || 0;
+  const tipo = document.getElementById('f-comision-tipo').value;
+  const valor = Number(document.getElementById('f-comision-valor').value) || 0;
+  return tipo === 'porcentaje' ? montoServicio * (valor / 100) : valor;
+}
+
+function updateIgvPreview() {
+  const monto = calcularComisionFG();
+  const moneda = document.getElementById('f-moneda').value;
+  const tipo = document.getElementById('f-comision-tipo').value;
+  document.getElementById('f-comision-valor-label').textContent = tipo === 'porcentaje' ? 'Porcentaje (0.3% – 100%)' : 'Monto fijo';
+  document.getElementById('f-comision-valor').min = tipo === 'porcentaje' ? 0.3 : 0;
+  document.getElementById('f-comision-valor').max = tipo === 'porcentaje' ? 100 : '';
+  document.getElementById('igv-preview').innerHTML =
+    '<span>Comisión FG (con IGV): ' + fmtCurrency(monto, moneda) + '</span><span>Sin IGV: ' + fmtCurrency(sinIGV(monto), moneda) + '</span>';
+  updateRepartoPreview();
+}
+
+function updateRepartoPreview() {
+  const monto = calcularComisionFG();
+  const moneda = document.getElementById('f-moneda').value;
+  const canal = document.getElementById('f-canal').value;
+  document.getElementById('asesor-fields').style.display = canal === 'asesor' ? 'block' : 'none';
+  if (canal !== 'asesor') return;
+  const tipo = document.getElementById('f-asesor-tipo').value;
+  const valor = Number(document.getElementById('f-asesor-valor').value) || 0;
+  document.getElementById('f-asesor-valor-label').textContent = tipo === 'porcentaje' ? 'Porcentaje (%)' : 'Monto fijo';
+  const pagada = tipo === 'porcentaje' ? monto * (valor / 100) : valor;
+  const neta = monto - pagada;
+  document.getElementById('reparto-preview').innerHTML =
+    '<span>Comisión pagada al asesor: ' + fmtCurrency(pagada, moneda) + '</span><span>Utilidad neta FG: ' + fmtCurrency(neta, moneda) + '</span>';
+}
+
+function openModal(id) {
+  editingId = id || null;
+  document.getElementById('modal-title').textContent = id ? 'Editar venta' : 'Nueva venta';
+  document.getElementById('err-cliente').classList.remove('show');
+  document.getElementById('err-monto-servicio').classList.remove('show');
+  document.getElementById('err-comision-valor').classList.remove('show');
+  if (id) {
+    const v = ventas.find(x => x.id === id);
+    document.getElementById('f-fecha').value = v.fecha;
+    document.getElementById('f-estado').value = v.estado;
+    const servicioGuardado = v.servicio || 'Otro';
+    const categoriasFijas = ['Asesoría en seguros','Asesoría en cartas fianza','Asesoría contable','Asesoría financiera','Asesoría general'];
+    if (servicioGuardado.startsWith('Asesoría en seguros — ')) {
+      document.getElementById('f-servicio').value = 'Asesoría en seguros';
+      document.getElementById('f-servicio-subtipo').value = servicioGuardado.replace('Asesoría en seguros — ', '');
+    } else if (categoriasFijas.includes(servicioGuardado)) {
+      document.getElementById('f-servicio').value = servicioGuardado;
+    } else {
+      document.getElementById('f-servicio').value = 'Otro';
+      document.getElementById('f-servicio-otro').value = servicioGuardado;
+    }
+    actualizarCamposServicio();
+    document.getElementById('f-vigencia').value = v.vigencia || '';
+    document.getElementById('f-cliente').value = v.cliente;
+    document.getElementById('f-ruc').value = v.ruc || '';
+    document.getElementById('f-contacto').value = v.contacto || '';
+    document.getElementById('f-moneda').value = v.moneda || 'PEN';
+    document.getElementById('f-monto-servicio').value = v.montoServicio != null ? v.montoServicio : v.monto;
+    document.getElementById('f-comision-tipo').value = v.comisionTipo || 'fijo';
+    document.getElementById('f-comision-valor').value = v.comisionValor != null ? v.comisionValor : v.monto;
+    document.getElementById('f-canal').value = v.asesor ? 'asesor' : 'directo';
+    document.getElementById('f-asesor').value = v.asesor || '';
+    document.getElementById('f-asesor-tipo').value = v.asesorTipo || 'porcentaje';
+    document.getElementById('f-asesor-valor').value = v.asesorValor || '';
+    document.getElementById('f-asesor-pagado').checked = !!v.asesorPagado;
+  } else {
+    document.getElementById('form').reset();
+    document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
+    document.getElementById('f-vigencia').value = '';
+    actualizarCamposServicio();
+    document.getElementById('f-estado').value = 'cobrado';
+    document.getElementById('f-moneda').value = 'PEN';
+    document.getElementById('f-comision-tipo').value = 'fijo';
+    document.getElementById('f-canal').value = 'directo';
+    document.getElementById('f-asesor-tipo').value = 'porcentaje';
+  }
+  updateIgvPreview();
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal() { document.getElementById('overlay').classList.remove('show'); }
+
+function openMetaModal() {
+  document.getElementById('err-meta').classList.remove('show');
+  document.getElementById('f-meta').value = meta > 0 ? meta : '';
+  document.getElementById('overlay-meta').classList.add('show');
+}
+function closeMetaModal() { document.getElementById('overlay-meta').classList.remove('show'); }
+
+async function deleteVenta(id) {
+  ventas = ventas.filter(v => v.id !== id);
+  await saveVentas();
+  refreshListas();
+  render();
+}
+
+document.getElementById('f-monto-servicio').addEventListener('input', updateIgvPreview);
+document.getElementById('f-servicio').addEventListener('change', actualizarCamposServicio);
+document.getElementById('f-comision-tipo').addEventListener('change', updateIgvPreview);
+document.getElementById('f-comision-valor').addEventListener('input', updateIgvPreview);
+document.getElementById('f-moneda').addEventListener('change', updateIgvPreview);
+document.getElementById('f-canal').addEventListener('change', updateRepartoPreview);
+document.getElementById('f-asesor-tipo').addEventListener('change', updateRepartoPreview);
+document.getElementById('f-asesor-valor').addEventListener('input', updateRepartoPreview);
+document.getElementById('f-cliente').addEventListener('change', (ev) => autocompletarPorNombre(ev.target.value, 'f-ruc', 'f-contacto'));
+document.getElementById('btn-cancel').onclick = closeModal;
+document.getElementById('overlay').addEventListener('click', (ev) => { if (ev.target.id === 'overlay') closeModal(); });
+
+document.getElementById('form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const cliente = document.getElementById('f-cliente').value.trim();
+  const montoServicioRaw = document.getElementById('f-monto-servicio').value;
+  const comisionTipo = document.getElementById('f-comision-tipo').value;
+  const comisionValorRaw = document.getElementById('f-comision-valor').value;
+  let valid = true;
+
+  if (!cliente) { document.getElementById('err-cliente').classList.add('show'); valid = false; }
+  else document.getElementById('err-cliente').classList.remove('show');
+
+  if (!montoServicioRaw || Number(montoServicioRaw) <= 0) { document.getElementById('err-monto-servicio').classList.add('show'); valid = false; }
+  else document.getElementById('err-monto-servicio').classList.remove('show');
+
+  const comisionValorNum = Number(comisionValorRaw);
+  const comisionValida = comisionTipo === 'porcentaje' ? (comisionValorRaw && comisionValorNum >= 0.3 && comisionValorNum <= 100) : (comisionValorRaw && comisionValorNum > 0);
+  if (!comisionValida) { document.getElementById('err-comision-valor').classList.add('show'); valid = false; }
+  else document.getElementById('err-comision-valor').classList.remove('show');
+
+  if (!valid) return;
+
+  const montoServicio = Number(montoServicioRaw);
+  const montoComision = comisionTipo === 'porcentaje' ? montoServicio * (comisionValorNum / 100) : comisionValorNum;
+
+  const canal = document.getElementById('f-canal').value;
+  const data = {
+    fecha: document.getElementById('f-fecha').value,
+    estado: document.getElementById('f-estado').value,
+    servicio: etiquetaServicio(),
+    vigencia: document.getElementById('f-vigencia').value,
+    cliente: cliente,
+    ruc: document.getElementById('f-ruc').value.trim(),
+    contacto: document.getElementById('f-contacto').value.trim(),
+    moneda: document.getElementById('f-moneda').value,
+    montoServicio: montoServicio,
+    comisionTipo: comisionTipo,
+    comisionValor: comisionValorNum,
+    monto: montoComision,
+    asesor: canal === 'asesor' ? document.getElementById('f-asesor').value.trim() : '',
+    asesorTipo: document.getElementById('f-asesor-tipo').value,
+    asesorValor: Number(document.getElementById('f-asesor-valor').value) || 0,
+    asesorPagado: document.getElementById('f-asesor-pagado').checked
+  };
+
+  if (editingId) {
+    const idx = ventas.findIndex(v => v.id === editingId);
+    ventas[idx] = { ...ventas[idx], ...data };
+  } else {
+    ventas.push({ id: 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), ...data });
+  }
+
+  const yaExiste = clientes.some(c => c.razon.toLowerCase() === cliente.toLowerCase());
+  if (!yaExiste) {
+    clientes.push({ id: 'cl_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), razon: cliente, ruc: data.ruc, contacto: data.contacto });
+    await saveClientes();
+  }
+
+  await saveVentas();
+  refreshListas();
+  currentMonthKey = monthKey(data.fecha);
+  currentView = 'bitacora';
+  closeModal();
+  render();
+});
+
+document.getElementById('btn-cancel-meta').onclick = closeMetaModal;
+document.getElementById('overlay-meta').addEventListener('click', (ev) => { if (ev.target.id === 'overlay-meta') closeMetaModal(); });
+
+document.getElementById('form-meta').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const val = document.getElementById('f-meta').value;
+  if (!val || Number(val) <= 0) { document.getElementById('err-meta').classList.add('show'); return; }
+  meta = Number(val);
+  await saveMeta();
+  closeMetaModal();
+  render();
+});
+
+document.querySelectorAll('.nav-item').forEach(b => { b.onclick = () => { currentView = b.dataset.view; render(); }; });
+
+async function init() {
+  await loadVentas();
+  await loadMeta();
+  await loadClientes();
+  await loadGastos();
+  refreshListas();
+  render();
+}
+</script>
+
+</body>
+</html>
