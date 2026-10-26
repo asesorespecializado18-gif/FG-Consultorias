@@ -429,6 +429,31 @@
   .vt .wc:nth-child(-n+3){border-bottom:1px solid var(--bd)}
   .vt .trust{grid-template-columns:repeat(3,1fr)}
   .vt .trust span:nth-child(-n+3){border-bottom:1px solid rgba(255,255,255,.15)}
+  /* Cotización en 2 hojas, letra más grande */
+  .vt .content{display:block}
+  .vt .d-hdr{flex-wrap:nowrap}.vt .d-meta{font-size:9.6px;max-width:36%}.vt .d-me{margin-left:14px;padding-left:12px}.vt .d-me .n1{font-size:18px;white-space:nowrap}.vt .d-me .n2{white-space:nowrap;font-size:8.6px}.vt .d-me .mono{width:48px;height:48px;font-size:15px}
+  .p1{margin-top:4px}
+  .page .p1 table.cmp th,.page .p1 table.cmp td{font-size:11.2px;padding:3.6px 7px}
+  .page .p1 table.cmp tr.prima td{font-size:15.5px;padding:5px 7px}
+  .page .p1 table.cmp.n4 th,.page .p1 table.cmp.n4 td,.page .p1 table.cmp.n5 th,.page .p1 table.cmp.n5 td{font-size:10.4px;padding:3.2px 5px}
+  .p1 .lgr .lg{height:44px}.p1 .lgr .lg img{max-height:40px;max-width:130px}.p1 .lgr .lg svg{height:40px}
+  .p1 .legend{font-size:10px;margin-top:6px}
+  .p1 .legend .nx{margin-left:auto;color:var(--m1);font-weight:700}
+  .p2{display:grid;grid-template-columns:1.15fr 1fr;gap:12px 18px;align-items:start;margin-top:8px}
+  .p2r{grid-column:1}.p2b{grid-column:2}.p2w,.p2q{grid-column:1/-1}
+  .p2.nob .p2r{grid-column:1/-1}
+  .p2 .benc{grid-template-columns:1fr}.p2 .benc.c2{grid-template-columns:1fr 1fr}
+  .p2 .reqs2{margin-top:0}
+  .p2 .hn{font-size:18px}.p2 .kpi b{font-size:22px}.p2 .kpi span,.p2 .kpi small{font-size:9.6px}
+  .p2 ul.chk li{font-size:11.6px}.p2 .hero .alt,.p2 .hero .sum{font-size:11.2px}
+  .p2 .bcard .bh{font-size:11.6px}.p2 .bcard ul.chk li{font-size:11px}
+  .p2 .wc b{font-size:11.8px}.p2 .wc>span{font-size:10.4px}
+  .p2 .trust span{font-size:10.4px}.p2 .close p{font-size:13.5px}
+  .p2 .reqs2{font-size:10.8px}
+  .vt .p2{grid-template-columns:1fr}
+  .vt .p2r,.vt .p2b,.vt .p2w,.vt .p2q{grid-column:1}
+  .vt .p2w{order:1}.vt .p2b{order:2}.vt .p2q{order:3}.vt .p2r{order:4}
+  .vt .p2 .benc,.vt .p2 .benc.c2{grid-template-columns:repeat(3,1fr)}
 </style>
 </head>
 <body>
@@ -1512,19 +1537,20 @@ function onePage({ title, box2, order, w, rows, extras, reqs, legal }) {
     <tr><th>Concepto</th>${order.map((q) => `<th class="${q.id === w.id ? "win" : ""}">${esc(nameOf(q))}${q.d.plan ? `<br><span style="font-weight:400;font-size:8.6px;opacity:.85">${esc(q.d.plan)}</span>` : ""}</th>`).join("")}</tr></thead>`;
   const cards = order.map((q) => { const e = extras(q); return e.length ? `<div class="bcard${q.id === w.id ? " w" : ""}"><div class="bh">${I("gift")}<b>${esc(nameOf(q))}</b>${q.id === w.id ? "<em>RECOMENDADA</em>" : ""}</div><ul class="chk">${e.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul></div>` : ""; }).filter(Boolean);
   const cli = `<div class="d-box dc" style="grid-template-columns:1.5fr 1fr"><div class="d-bt" style="grid-column:1/-1">${I("user")} Datos del cliente</div>${kvI("user", "Cliente", c.nombre)}${kvI("id", "DNI / RUC", c.documento)}${String(c.celular || "").trim() ? kvI("phone", "Celular", c.celular) : ""}${String(c.correo || "").trim() ? kvI("mail", "Correo", c.correo) : ""}</div>`;
-  const html = `${hdr(true)}
+  const p1 = `${hdr(true)}
     <div class="d-hero" style="margin:5px 0 4px"><div><h1 style="font-size:19px">${esc(title)}</h1>
       <p class="d-sub">Preparada especialmente para <b>${esc(c.nombre || "")}</b> · Comparativo de ${n} aseguradora${n > 1 ? "s" : ""}</p></div></div>
     <div class="d-info">${cli}${box2}</div>
-    <div class="one${n >= 4 ? " w5" : ""}">
-      <div><h2>Comparativo de coberturas</h2><table class="cmp n${n}">${head}<tbody>${rows.join("")}</tbody></table>
-        <div class="legend"><span><span class="ic y">✓</span>Incluido</span><span><i class="sw g"></i>Ventaja frente a las demás</span><span><i class="sw r"></i>Opción recomendada</span></div></div>
-      <div class="side"><div><h2>Mi recomendación para usted</h2>${heroReco(w)}</div>
-        ${cards.length ? `<div><h2>Beneficios adicionales</h2><div class="benc">${cards.join("")}</div></div>` : ""}</div>
-    </div>
-    <div class="btm"><h2>¿Por qué contratar con nosotros?</h2>${WHY()}</div>
-    <div class="reqs2">${I("doc")}<span><b>Para emitir:</b> ${reqs.map(esc).join(" · ")}. Nosotros nos encargamos de todo el trámite.</span></div>`;
-  return pageWrap([html], legal);
+    <div class="p1"><h2>Comparativo de coberturas</h2><table class="cmp n${n}">${head}<tbody>${rows.join("")}</tbody></table>
+      <div class="legend"><span><span class="ic y">✓</span>Incluido</span><span><i class="sw g"></i>Ventaja frente a las demás</span><span><i class="sw r"></i>Opción recomendada</span><span class="nx">Continúa en la siguiente hoja: mi recomendación para usted →</span></div></div>`;
+  const p2 = `${hdr(false)}
+    <div class="p2${cards.length ? "" : " nob"}">
+      <div class="p2r"><h2>Mi recomendación para usted</h2>${heroReco(w)}</div>
+      ${cards.length ? `<div class="p2b"><h2>Beneficios adicionales</h2><div class="benc${cards.length > 2 ? " c2" : ""}">${cards.join("")}</div></div>` : ""}
+      <div class="p2w"><h2>¿Por qué contratar con nosotros?</h2>${WHY()}</div>
+      <div class="reqs2 p2q">${I("doc")}<span><b>Para emitir:</b> ${reqs.map(esc).join(" · ")}. Nosotros nos encargamos de todo el trámite.</span></div>
+    </div>`;
+  return pageWrap([p1, p2], legal);
 }
 const legalOf = (order, txt) => `${txt}${order.some((q) => q.ref) ? ` ${order.filter((q) => q.ref).map(nameOf).join(", ")}: valores referenciales sujetos a cotización oficial.` : ""} Cotización sujeta a condiciones generales, particulares, cláusulas y exclusiones de cada póliza.`;
 // Beneficios adicionales de cada aseguradora: los comerciales que marcaste + los extras del PDF
