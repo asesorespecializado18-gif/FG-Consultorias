@@ -484,6 +484,28 @@
   .p2 ul.chk li{font-size:11.6px}.p2 .hero .alt,.p2 .hero .sum{font-size:11.2px}
   .p2 .bcard .bh{font-size:11.6px}.p2 .bcard ul.chk li{font-size:11px}
   .p2 .bcard .bsub{font-size:9.2px}
+  .bmk{border:1px solid var(--m1);border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(110,28,34,.14)}
+  .bmk-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 12px;background:linear-gradient(120deg,var(--m1),var(--m2));color:#fff;box-shadow:inset 0 -2px 0 var(--gold)}
+  .bmk-h span{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+  .bmk-h span svg{width:14px;height:14px;color:var(--gold2)}
+  .bmk-h b{font-size:12px;font-weight:800;color:var(--gold2);text-transform:uppercase;letter-spacing:1.2px}
+  .bmk-t{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;padding:10px 10px 4px}
+  .bmk-t .bt{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:9px 6px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--panel)}
+  .bmk-t .bt i{width:26px;height:26px;border-radius:50%;background:var(--m1);display:flex;align-items:center;justify-content:center;margin-bottom:2px}
+  .bmk-t .bt i svg{width:14px;height:14px;color:#fff}
+  .bmk-t .bt b{font-size:15px;line-height:1.1;color:var(--m2);font-weight:800}
+  .bmk-t .bt span{font-size:9.4px;line-height:1.25;color:var(--muted)}
+  .bmk-t .bt.alta{border-color:var(--gold);background:linear-gradient(180deg,#fffaf0,#fff)}
+  .bmk-t .bt.alta i{background:linear-gradient(135deg,var(--gold2),var(--gold))}
+  .bmk-t .bt em{position:absolute;top:-1px;right:-1px;font-style:normal;font-size:7.4px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;background:linear-gradient(90deg,var(--gold2),var(--gold));color:var(--m2);padding:2px 6px;border-radius:0 8px 0 8px}
+  .bmk ul.bmk-l{padding:6px 14px 0;margin:0}
+  .bmk-f{display:flex;align-items:center;gap:7px;margin:6px 10px 10px;padding:6px 9px;border-radius:7px;background:#fff6e0;border:1px dashed var(--gold);font-size:9.8px;color:var(--ink);line-height:1.3}
+  .bmk-f svg{flex:none;width:15px;height:15px;color:var(--m1)}
+  .bmk-f b{color:var(--m1)}
+  .bmk-o{border-top:1px solid var(--bd);padding:6px 12px 8px;font-size:9.2px;color:var(--muted);line-height:1.4;background:#fcfafa}
+  .bmk-o b{color:var(--ink)}
+  .p2 .bmk-l li{font-size:10.6px}
+  .vt .bmk-t.n3,.vt .bmk-t.n5,.vt .bmk-t.n6{grid-template-columns:repeat(3,1fr)}.vt .bmk-t.n4,.vt .bmk-t.n7,.vt .bmk-t.n8{grid-template-columns:repeat(4,1fr)}
   .p2 .wc b{font-size:11.8px}.p2 .wc>span{font-size:10.4px}
   .p2 .trust span{font-size:10.4px}.p2 .close p{font-size:13.5px}
   .p2 .reqs2{font-size:10.8px}
@@ -1473,6 +1495,8 @@ const ICO = {
   doc: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
   scale: '<path d="M12 3v18M7 21h10M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/>',
   award: '<circle cx="12" cy="9" r="6"/><path d="m9 14.2-1.5 7.3L12 19l4.5 2.5L15 14.2"/><path d="m9.8 9 1.5 1.5 3-3"/>',
+  fuel: '<path d="M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M3 21h13M4 10h11"/><path d="M15 8h2a2 2 0 0 1 2 2v7a1.5 1.5 0 0 0 3 0V9l-3-3"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   wa: '<path d="M3.5 20.5l1.3-4A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-1 .8c-1-.4-2.4-1.8-2.8-2.8l.8-1-1-2z" fill="currentColor" stroke="none"/>',
 };
 const I = (k) => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICO[k] || ""}</svg>`;
@@ -1594,12 +1618,7 @@ function onePage({ title, box2, order, w, rows, extras, reqs, legal }) {
   const n = order.length;
   const head = `<thead><tr class="lgr"><td></td>${order.map((q) => `<td>${q.id === w.id ? '<span class="bdg">★ RECOMENDADO</span>' : q.ref ? '<span class="rf">REFERENCIAL</span>' : ""}<div class="lg">${logoOf(q)}</div></td>`).join("")}</tr>
     <tr><th>Concepto</th>${order.map((q) => `<th class="${q.id === w.id ? "win" : ""}">${esc(nameOf(q))}${q.d.plan ? `<br><span style="font-weight:400;font-size:8.6px;opacity:.85">${esc(q.d.plan)}</span>` : ""}</th>`).join("")}</tr></thead>`;
-  const lista = (a) => `<ul class="chk">${a.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul>`;
-  const cards = order.map((q) => {
-    const e = extras(q), g = regaloOf(q);
-    if (!e.length && !g.length) return "";
-    return `<div class="bcard${q.id === w.id ? " w" : ""}"><div class="bh">${I("gift")}<b>${esc(nameOf(q))}</b>${q.id === w.id ? "<em>RECOMENDADA</em>" : ""}</div>${g.length ? `<div class="bsub alta">${I("gift")} Obsequio de ${esc(cfg.corredora)}</div>${lista(g)}` : ""}${e.length ? `${g.length ? `<div class="bsub">Beneficios de la aseguradora</div>` : ""}${lista(e)}` : ""}</div>`;
-  }).filter(Boolean);
+  const benef = beneficiosBlock(order, w, extras);
   const cli = `<div class="d-box dc" style="grid-template-columns:1.5fr 1fr"><div class="d-bt" style="grid-column:1/-1">${I("user")} Datos del cliente</div>${kvI("user", "Cliente", c.nombre)}${kvI("id", "DNI / RUC", c.documento)}${String(c.celular || "").trim() ? kvI("phone", "Celular", c.celular) : ""}${String(c.correo || "").trim() ? kvI("mail", "Correo", c.correo) : ""}</div>`;
   const p1 = `${hdr(true)}
     <div class="d-hero" style="margin:5px 0 4px"><div><h1 style="font-size:19px">${esc(title)}</h1>
@@ -1608,15 +1627,49 @@ function onePage({ title, box2, order, w, rows, extras, reqs, legal }) {
     <div class="p1"><h2>Comparativo de coberturas</h2><table class="cmp n${n}">${head}<tbody>${rows.join("")}</tbody></table>
       <div class="legend"><span><span class="ic y">✓</span>Incluido</span><span><i class="sw g"></i>Ventaja frente a las demás</span><span><i class="sw r"></i>Opción recomendada</span><span class="nx">Continúa en la siguiente hoja: mi recomendación para usted →</span></div></div>`;
   const p2 = `${hdr(false)}
-    <div class="p2${cards.length ? "" : " nob"}">
+    <div class="p2${benef ? "" : " nob"}">
       <div class="p2r"><h2>Mi recomendación para usted</h2>${heroReco(w)}</div>
-      ${cards.length ? `<div class="p2b"><h2>Beneficios adicionales</h2><div class="benc${cards.length > 2 ? " c2" : ""}">${cards.join("")}</div></div>` : ""}
+      ${benef ? `<div class="p2b"><h2>Beneficios exclusivos</h2>${benef}</div>` : ""}
       <div class="p2w"><h2>¿Por qué contratar con nosotros?</h2>${WHY()}</div>
       <div class="reqs2 p2q">${I("doc")}<span><b>Para emitir:</b> ${reqs.map(esc).join(" · ")}. Nosotros nos encargamos de todo el trámite.</span></div>
     </div>`;
   return pageWrap([p1, p2], legal);
 }
 const legalOf = (order, txt) => `${txt}${order.some((q) => q.ref) ? ` ${order.filter((q) => q.ref).map(nameOf).join(", ")}: valores referenciales sujetos a cotización oficial.` : ""} Cotización sujeta a condiciones generales, particulares, cláusulas y exclusiones de cada póliza.`;
+// Un solo espacio de beneficios, pensado para vender: los de la opción recomendada como protagonistas (tarjetas con
+// la cifra grande; lo que regala el corredor lleva la cinta «Obsequio»), lo demás en lista, fecha límite de la oferta
+// y una línea con lo que dan las otras aseguradoras para que se pueda comparar.
+function tilesOf(q, cur) {
+  const x = X(q), p = q.d.prima_anual || 0, t = [];
+  const soat = soatAnos(x), nc = cuotasSI(x);
+  if (soat && isVeh()) t.push({ i: "car", b: "SOAT gratis", s: soat === 2 ? "por 2 años" : "por 1 año", alta: true });
+  if (x.gps > 0 && isVeh()) t.push({ i: "pin", b: `${x.gps}%`, s: "de descuento en GPS", alta: true });
+  if (x.dsctoA > 0) t.push({ i: "pct", b: `${x.dsctoA}%`, s: "de descuento en su prima" });
+  if (x.gratis > 0) t.push({ i: "gift", b: x.gratis == 1 ? "1 cuota" : `${x.gratis} cuotas`, s: "gratis" });
+  if (x.vales && String(x.vales).trim() && isVeh()) t.push({ i: "fuel", b: String(x.vales).trim(), s: "en vales de combustible" });
+  if (nc) t.push({ i: "wallet", b: `${nc} cuotas`, s: p ? `sin intereses de ${cur} ${fmt(p / nc)} con débito automático` : "sin intereses con débito automático" });
+  if (x.cupN > 0) t.push({ i: "doc", b: `${x.cupN} cupones`, s: p ? `sin intereses de ${cur} ${fmt(p / x.cupN)}` : "sin intereses" });
+  if (x.dcto > 0) t.push({ i: "tag", b: `${x.dcto}%`, s: p ? `al contado: ${cur} ${fmt(p * (1 - x.dcto / 100))}` : "de descuento al contado" });
+  return t;
+}
+function beneficiosBlock(order, w, extras) {
+  const curOf = (q) => q.d.moneda || "US$";
+  const tiles = tilesOf(w, curOf(w));
+  // Lo que no es cifra (campañas, extras del PDF, «ideal para») va en lista
+  const nums = new Set(["soat", "gps", "dsctoA", "gratis", "vales", "c12", "cupN", "dcto"]);
+  const o = perksOf(w, curOf(w)), libres = extras(w).filter((t) => !Object.entries(o).some(([k, v]) => nums.has(k) && (t === v || t === v + " con débito automático")));
+  const otras = order.filter((q) => q.id !== w.id).map((q) => { const v = [...regaloOf(q), ...extrasOf(q, curOf(q))]; return v.length ? `<b>${esc(nameOf(q))}:</b> ${v.map(esc).join(" · ")}` : ""; }).filter(Boolean);
+  if (!tiles.length && !libres.length && !otras.length) return "";
+  const hasta = new Date(Date.now() + (Number(cfg.validez) || 15) * 864e5).toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const top = tiles.length || libres.length;
+  return `<div class="bmk">
+    ${top ? `<div class="bmk-h"><span>${I("gift")} Al contratar ${esc(nameOf(w))} con nosotros</span><b>usted recibe</b></div>` : ""}
+    ${tiles.length ? `<div class="bmk-t n${Math.min(tiles.length, 8)}">${tiles.map((t) => `<div class="bt${t.alta ? " alta" : ""}">${t.alta ? `<em>Obsequio ${esc(String(cfg.corredora).split(" ")[0])}</em>` : ""}<i>${I(t.i)}</i><b>${esc(t.b)}</b><span>${esc(t.s)}</span></div>`).join("")}</div>` : ""}
+    ${libres.length ? `<ul class="chk bmk-l">${libres.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul>` : ""}
+    ${top ? `<div class="bmk-f">${I("clock")}<span>Beneficios reservados para usted hasta el <b>${hasta}</b>. Confírmenos hoy y nosotros hacemos todo el trámite.</span></div>` : ""}
+    ${otras.length ? `<div class="bmk-o">${otras.map((x) => `<div>${x}</div>`).join("")}</div>` : ""}
+  </div>`;
+}
 // Beneficios adicionales de cada aseguradora: los comerciales que marcaste + los extras del PDF
 const ALTA_K = ["soat", "gps"];
 const extrasOf = (q, cur) => { const o = perksOf(q, cur), out = Object.entries(o).filter(([k]) => !ALTA_K.includes(k)).map(([k, v]) => (k === "c12" ? v + " con débito automático" : v)); const ex = q.d.serv?.extras; if (ex && !/^no\b/i.test(ex)) out.push(ex); return out; };
