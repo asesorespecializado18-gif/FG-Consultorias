@@ -388,6 +388,15 @@
   .vt .band.me .bn{font-size:15px;white-space:nowrap}
   .vt .band.me .bt{font-size:8px;letter-spacing:1.6px;white-space:nowrap}
   .vt .band.me .mono{width:38px;height:38px;font-size:12.5px}
+  .band.me.fin{justify-content:center;gap:26px;padding:9px 26px}
+  .band.me.fin .blogo{background:#fff;border-radius:8px;padding:5px 12px;display:flex;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+  .band.me.fin .blogo img{height:34px;display:block}
+  .band.me.fin .sep{width:1.5px;align-self:stretch;background:linear-gradient(180deg,transparent,var(--gold),transparent);margin:0}
+  .band.me.fin .bwho{text-align:left}
+  .band.me.fin .bn{text-transform:uppercase;letter-spacing:2px;font-size:17px}
+  .vt .band.me.fin{gap:20px;padding:8px 18px}
+  .vt .band.me.fin .bn{font-size:15px;letter-spacing:1.6px}
+  .vt .band.me.fin .blogo img{height:30px}
   .vt .bk2{gap:8px}
   .vt .bk2 .pill{padding:4px 12px 4px 5px;gap:7px}
   .vt .bk2 .pill>svg{width:24px;height:24px;padding:5px}
@@ -1435,9 +1444,8 @@ function cell(v) {
 function band(conContacto) {
   // El celular y el correo van una sola vez: en la franja de la última hoja. Las demás llevan un pie delgado.
   if (!conContacto) return `<div class="slim">${esc(cfg.corredora)} · Registro SBS ${esc(cfg.reg)} · ${esc(cfg.nombre)}</div>`;
-  const pill = (ic, l, v) => String(v || "").trim() ? `<div class="pill">${I(ic)}<div><span>${l}</span><b>${esc(v)}</b></div></div>` : "";
-  const k = pill("phone", "Celular / WhatsApp", cfg.cel) + pill("mail", "Correo", cfg.mail);
-  return `<div class="band me"><div class="bl"><div class="mono">EFC</div><div><div class="bn">${esc(cfg.nombre)}</div>${cfg.cargo ? `<div class="bt">${esc(cfg.cargo)}</div>` : ""}</div></div>${k ? `<div class="sep"></div><div class="bk2">${k}</div>` : ""}</div>`;
+  // Franja final: logo de Alta | nombre y cargo, centrados y separados por una línea (el contacto va junto al QR)
+  return `<div class="band me fin"><div class="blogo"><img src="${ALTA_LOGO}" alt="${esc(cfg.corredora)}"></div><div class="sep"></div><div class="bwho"><div class="bn">${esc(cfg.nombre)}</div>${cfg.cargo ? `<div class="bt">${esc(cfg.cargo)}</div>` : ""}</div></div>`;
 }
 function hdr(first) {
   const brand = `<div class="d-brand alta"><img src="${ALTA_LOGO}" alt="Alta Corredores de Seguros"><div class="regs">Registro SBS: ${esc(cfg.reg)}<i>|</i>Registro SUSALUD: ${esc(cfg.sus)}<i>|</i>Miembros de APECOSE</div></div>`;
