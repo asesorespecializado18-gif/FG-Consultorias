@@ -373,6 +373,10 @@
   .bcard.w .bh svg{color:var(--gold2)}
   .bcard .bh em{margin-left:auto;font-style:normal;background:linear-gradient(90deg,var(--gold2),var(--gold));color:var(--m2);font-size:7.8px;font-weight:800;padding:1px 6px;border-radius:10px;letter-spacing:.6px}
   .bcard ul.chk{padding:6px 9px 7px}.bcard ul.chk li{font-size:9.6px}
+  .bcard .bsub{display:flex;align-items:center;gap:5px;margin:6px 9px 0;padding-bottom:3px;border-bottom:1px solid var(--bd);font-size:8.4px;font-weight:800;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted)}
+  .bcard .bsub.alta{color:var(--m1);border-bottom-color:var(--gold)}
+  .bcard .bsub svg{width:11px;height:11px;color:var(--gold)}
+  .bcard .bsub + ul.chk{padding-top:4px}
   .whyc{display:grid;grid-template-columns:1fr 1fr;gap:7px}
   .whyc>div{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--bd);border-radius:9px;padding:7px 10px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.05)}
   .whyc i{flex:none;width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--red),var(--m1) 70%);color:#fff;display:grid;place-items:center;box-shadow:0 2px 5px rgba(110,28,34,.3)}
@@ -479,6 +483,7 @@
   .p2 .hn{font-size:18px}.p2 .kpi b{font-size:22px}.p2 .kpi span,.p2 .kpi small{font-size:9.6px}
   .p2 ul.chk li{font-size:11.6px}.p2 .hero .alt,.p2 .hero .sum{font-size:11.2px}
   .p2 .bcard .bh{font-size:11.6px}.p2 .bcard ul.chk li{font-size:11px}
+  .p2 .bcard .bsub{font-size:9.2px}
   .p2 .wc b{font-size:11.8px}.p2 .wc>span{font-size:10.4px}
   .p2 .trust span{font-size:10.4px}.p2 .close p{font-size:13.5px}
   .p2 .reqs2{font-size:10.8px}
@@ -1135,8 +1140,9 @@ function comGridRows(qs) {
     if (c.t === "chk") return `<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-q="${q.id}" data-x="${c.k}" ${v ? "checked" : ""}> Sí, lo ofrezco</label>`;
     return `<input data-q="${q.id}" data-x="${c.k}" ${c.t === "num" ? 'type="number" min="0" step="1" placeholder="0 = no"' : 'placeholder="—"'} value="${esc(v || "")}">`;
   };
-  return `<tr class="sec"><td colspan="${qs.length + 1}">Beneficios comerciales (los agregas tú; salen en el PDF)</td></tr>` +
-    comFields().map((c) => `<tr><td class="lab">${c.l}${qs.length > 1 ? `<br><button class="btn sm" data-f="xall" data-k="${c.k}" data-q="${qs[0].id}">Igual en todas</button>` : ""}</td>${qs.map((q) => `<td>${cell(q, c)}</td>`).join("")}</tr>`).join("");
+  const row = (c) => `<tr><td class="lab">${c.l}${qs.length > 1 ? `<br><button class="btn sm" data-f="xall" data-k="${c.k}" data-q="${qs[0].id}">Igual en todas</button>` : ""}</td>${qs.map((q) => `<td>${cell(q, c)}</td>`).join("")}</tr>`;
+  const grupo = (g, t) => { const fs = comFields().filter((c) => c.g === g); return fs.length ? `<tr class="sec"><td colspan="${qs.length + 1}">${t}</td></tr>` + fs.map(row).join("") : ""; };
+  return grupo("alta", "🎁 Obsequio de Alta Corredores (lo regalas tú; sale aparte en el PDF)") + grupo("aseg", "Beneficios de la aseguradora (descuentos, campañas y formas de pago)");
 }
 function genRows(qs) {
   const rows = Object.fromEntries(SECS.map((s) => [s, new Map()]));
@@ -1306,16 +1312,20 @@ function spanDays(a, b) {
 
 /* ---------- Beneficios comerciales (los ofrece el corredor; no vienen del PDF) ---------- */
 // q.x = { soat: años de SOAT gratis (0/1/2; antes true = 1), c12: n° de cuotas sin interés (antes true = 12), gratis: n° de cuotas gratis,
-//         gps: % de descuento en GPS, cupN: n° de cupones, dcto: % por pago al contado, otro: texto }
+//         gps: % de descuento en GPS, dsctoA: % de descuento de la aseguradora, vales: vales de combustible (texto),
+//         cupN: n° de cupones, dcto: % por pago al contado, otro: texto }
+// g: "alta" = lo regala el corredor (Obsequio de Alta Corredores); "aseg" = lo da la aseguradora (descuentos, campañas, formas de pago)
 const X = (q) => (q.x ??= {});
 const COM = [
-  { k: "soat", l: "SOAT gratis", t: "sel", opts: [[0, "No"], [1, "1 año"], [2, "2 años"]], veh: true },
-  { k: "c12", l: "Cuotas sin interés con débito automático (N° de cuotas)", t: "num" },
-  { k: "gratis", l: "Cuota gratis (N° de cuotas)", t: "num" },
-  { k: "gps", l: "Descuento en GPS (%)", t: "num", veh: true },
-  { k: "cupN", l: "Cupones sin interés (N° de cupones)", t: "num" },
-  { k: "dcto", l: "Descuento por pago al contado (%)", t: "num" },
-  { k: "otro", l: "Otro beneficio (ej. lavado gratis, 1 mes gratis)", t: "txt" },
+  { k: "soat", l: "SOAT gratis", t: "sel", opts: [[0, "No"], [1, "1 año"], [2, "2 años"]], veh: true, g: "alta" },
+  { k: "gps", l: "Descuento en GPS (%)", t: "num", veh: true, g: "alta" },
+  { k: "dsctoA", l: "Descuento de la aseguradora (%)", t: "num", g: "aseg" },
+  { k: "gratis", l: "Cuota gratis (N° de cuotas)", t: "num", g: "aseg" },
+  { k: "vales", l: "Vales de combustible (ej. S/ 100)", t: "txt", veh: true, g: "aseg" },
+  { k: "c12", l: "Cuotas sin interés con débito automático (N° de cuotas)", t: "num", g: "aseg" },
+  { k: "cupN", l: "Cupones sin interés (N° de cupones)", t: "num", g: "aseg" },
+  { k: "dcto", l: "Descuento por pago al contado (%)", t: "num", g: "aseg" },
+  { k: "otro", l: "Otro beneficio o campaña de la aseguradora", t: "txt", g: "aseg" },
 ];
 const comFields = () => COM.filter((c) => !c.veh || isVeh());
 // Textos de cada beneficio para una cotización, ya con los montos calculados
@@ -1327,8 +1337,10 @@ function perksOf(q, cur) {
   const soat = soatAnos(x), nc = cuotasSI(x);
   if (soat && isVeh()) o.soat = soat === 2 ? "SOAT gratis por 2 años" : "SOAT gratis por 1 año";
   if (nc) o.c12 = p ? `${nc} cuotas sin interés de ${cur} ${fmt(p / nc)}` : `${nc} cuotas sin interés`;
+  if (x.dsctoA > 0) o.dsctoA = `${x.dsctoA}% de descuento en la prima`;
   if (x.gratis > 0) o.gratis = x.gratis == 1 ? "1 cuota gratis" : `${x.gratis} cuotas gratis`;
   if (x.gps > 0 && isVeh()) o.gps = `${x.gps}% de descuento en GPS`;
+  if (x.vales && String(x.vales).trim() && isVeh()) o.vales = `Vales de combustible ${String(x.vales).trim()}`;
   if (x.cupN > 0) o.cupN = p ? `${x.cupN} cupones sin interés de ${cur} ${fmt(p / x.cupN)}` : `${x.cupN} cupones sin interés`;
   if (x.dcto > 0) o.dcto = p ? `Al contado: ${cur} ${fmt(p * (1 - x.dcto / 100))} (${x.dcto}% dcto.)` : `${x.dcto}% de descuento al contado`;
   if (x.otro && x.otro.trim()) o.otro = x.otro.trim();
@@ -1338,15 +1350,17 @@ const perkChips = (q, cur) => { const o = perksOf(q, cur), ks = Object.keys(o); 
 // Filas del comparativo del PDF: solo las que alguna aseguradora ofrece
 function comTable(order, curOf) {
   const per = order.map((q) => perksOf(q, curOf(q)));
-  const label = { soat: "SOAT gratis", c12: "Cuotas sin interés (débito automático)", gratis: "Cuota gratis", gps: "Descuento en GPS", cupN: "Cupones sin interés", dcto: "Pago al contado", otro: "Otros beneficios" };
+  const label = { soat: "SOAT gratis", c12: "Cuotas sin interés (débito automático)", gratis: "Cuota gratis", gps: "Descuento en GPS", dsctoA: "Descuento de la aseguradora", vales: "Vales de combustible", cupN: "Cupones sin interés", dcto: "Pago al contado", otro: "Otros beneficios" };
   return Object.keys(label).filter((k) => per.some((o) => o[k])).map((k) => ({ l: label[k], vals: per.map((o) => !o[k] ? "No" : k === "soat" ? o[k].replace(/^SOAT gratis por /, "") : o[k].replace(/^(\d+) cuotas sin interés de /, "$1 × ").replace(/^(\d+) cupones sin interés de /, "$1 × ").replace(/^Al contado: /, "")) }));
 }
 function perkLine(q, cur) {
   const o = perksOf(q, cur), t = [];
   if (o.soat) t.push(o.soat);
   if (o.c12) t.push(o.c12 + " con débito automático");
+  if (o.dsctoA) t.push(o.dsctoA);
   if (o.gratis) t.push(o.gratis);
   if (o.gps) t.push(o.gps);
+  if (o.vales) t.push(o.vales);
   if (o.cupN) t.push(o.cupN);
   if (o.dcto) t.push(o.dcto.replace(/^Al contado:/, "pago al contado de"));
   if (o.otro) t.push(o.otro);
@@ -1478,7 +1492,7 @@ function band(conContacto) {
   return `<div class="band me fin"><div class="blogo"><img src="${ALTA_LOGO}" alt="${esc(cfg.corredora)}"></div><div class="sep"></div><div class="bwho"><div class="bn">${esc(cfg.nombre)}</div>${cfg.cargo ? `<div class="bt">${esc(cfg.cargo)}</div>` : ""}</div></div>`;
 }
 function hdr(first) {
-  const brand = `<div class="d-brand alta"><img src="${ALTA_LOGO}" alt="Alta Corredores de Seguros"><div class="regs">Registro SBS: ${esc(cfg.reg)}<i>|</i>Registro SUSALUD: ${esc(cfg.sus)}<i>|</i>Miembros de APECOSE</div></div>`;
+  const brand = `<div class="d-brand alta"><img src="${ALTA_LOGO}" alt="Alta Corredores de Seguros"><div class="regs">Registro SBS: ${esc(cfg.reg)}<i>|</i>Registro SUSALUD: ${esc(cfg.sus)}</div></div>`;
   const d = new Date(), f = d.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
   const pre = { Vehicular: "VEH", Moto: "MOT" }[st.ramo] || norm(ramoName()).slice(0, 3) || "GEN";
   const nro = `EFC-${pre}-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}`;
@@ -1580,7 +1594,12 @@ function onePage({ title, box2, order, w, rows, extras, reqs, legal }) {
   const n = order.length;
   const head = `<thead><tr class="lgr"><td></td>${order.map((q) => `<td>${q.id === w.id ? '<span class="bdg">★ RECOMENDADO</span>' : q.ref ? '<span class="rf">REFERENCIAL</span>' : ""}<div class="lg">${logoOf(q)}</div></td>`).join("")}</tr>
     <tr><th>Concepto</th>${order.map((q) => `<th class="${q.id === w.id ? "win" : ""}">${esc(nameOf(q))}${q.d.plan ? `<br><span style="font-weight:400;font-size:8.6px;opacity:.85">${esc(q.d.plan)}</span>` : ""}</th>`).join("")}</tr></thead>`;
-  const cards = order.map((q) => { const e = extras(q); return e.length ? `<div class="bcard${q.id === w.id ? " w" : ""}"><div class="bh">${I("gift")}<b>${esc(nameOf(q))}</b>${q.id === w.id ? "<em>RECOMENDADA</em>" : ""}</div><ul class="chk">${e.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul></div>` : ""; }).filter(Boolean);
+  const lista = (a) => `<ul class="chk">${a.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul>`;
+  const cards = order.map((q) => {
+    const e = extras(q), g = regaloOf(q);
+    if (!e.length && !g.length) return "";
+    return `<div class="bcard${q.id === w.id ? " w" : ""}"><div class="bh">${I("gift")}<b>${esc(nameOf(q))}</b>${q.id === w.id ? "<em>RECOMENDADA</em>" : ""}</div>${g.length ? `<div class="bsub alta">${I("gift")} Obsequio de ${esc(cfg.corredora)}</div>${lista(g)}` : ""}${e.length ? `${g.length ? `<div class="bsub">Beneficios de la aseguradora</div>` : ""}${lista(e)}` : ""}</div>`;
+  }).filter(Boolean);
   const cli = `<div class="d-box dc" style="grid-template-columns:1.5fr 1fr"><div class="d-bt" style="grid-column:1/-1">${I("user")} Datos del cliente</div>${kvI("user", "Cliente", c.nombre)}${kvI("id", "DNI / RUC", c.documento)}${String(c.celular || "").trim() ? kvI("phone", "Celular", c.celular) : ""}${String(c.correo || "").trim() ? kvI("mail", "Correo", c.correo) : ""}</div>`;
   const p1 = `${hdr(true)}
     <div class="d-hero" style="margin:5px 0 4px"><div><h1 style="font-size:19px">${esc(title)}</h1>
@@ -1599,7 +1618,10 @@ function onePage({ title, box2, order, w, rows, extras, reqs, legal }) {
 }
 const legalOf = (order, txt) => `${txt}${order.some((q) => q.ref) ? ` ${order.filter((q) => q.ref).map(nameOf).join(", ")}: valores referenciales sujetos a cotización oficial.` : ""} Cotización sujeta a condiciones generales, particulares, cláusulas y exclusiones de cada póliza.`;
 // Beneficios adicionales de cada aseguradora: los comerciales que marcaste + los extras del PDF
-const extrasOf = (q, cur) => { const o = perksOf(q, cur), out = Object.values(o); if (o.c12) out[Object.keys(o).indexOf("c12")] = o.c12 + " con débito automático"; const ex = q.d.serv?.extras; if (ex && !/^no\b/i.test(ex)) out.push(ex); return out; };
+const ALTA_K = ["soat", "gps"];
+const extrasOf = (q, cur) => { const o = perksOf(q, cur), out = Object.entries(o).filter(([k]) => !ALTA_K.includes(k)).map(([k, v]) => (k === "c12" ? v + " con débito automático" : v)); const ex = q.d.serv?.extras; if (ex && !/^no\b/i.test(ex)) out.push(ex); return out; };
+// Lo que regala el corredor (sale aparte como «Obsequio de Alta Corredores»)
+const regaloOf = (q) => { const o = perksOf(q, ""); return ALTA_K.filter((k) => o[k]).map((k) => o[k]); };
 function buildGenDoc() {
   const qs = ready(), w = winner();
   if (!qs.length) return null;
