@@ -1692,6 +1692,7 @@ function saveHist(silent) {
     detalle: isVeh() ? [st.veh.marca, st.veh.modelo, st.veh.anio, st.veh.placa && "Placa " + st.veh.placa].filter(Boolean).join(" ") : st.rie.bien || "",
     recomendada: `${nameOf(w)}${w.d.plan ? " – " + w.d.plan : ""}`, moneda: w.d.moneda || "US$", prima: w.d.prima_anual || 0,
     contrato: prev?.contrato || false, vence: prev?.vence || toISO(w.d.vigencia_fin), renovadoDe: prev?.renovadoDe || st.renewOf || "",
+    crmClienteId: st.crmClienteId || prev?.crmClienteId || "",
     st: snapshot(),
   };
   st.histId = item.id;
@@ -1711,7 +1712,7 @@ function renewHist(id) {
   if (st.quotes.length && !confirm("¿Empezar la renovación? Se reemplazará la cotización que tienes en pantalla.")) return;
   const o = h.st;
   st = fresh(o.ramo);
-  Object.assign(st, { ramoOtro: o.ramoOtro || "", cli: structuredClone(o.cli), veh: structuredClone(o.veh), rie: structuredClone(o.rie || {}), act: { aseg: h.recomendada, prima: String(h.prima || ""), vence: fromISO(h.vence) }, renewOf: h.id });
+  Object.assign(st, { ramoOtro: o.ramoOtro || "", cli: structuredClone(o.cli), veh: structuredClone(o.veh), rie: structuredClone(o.rie || {}), act: { aseg: h.recomendada, prima: String(h.prima || ""), vence: fromISO(h.vence) }, renewOf: h.id, crmClienteId: o.crmClienteId || h.crmClienteId || "" });
   $("#histModal").classList.remove("show"); $("#renewBar").style.display = "none";
   renderAll();
   toast(`Renovación de ${h.cliente}: sube las nuevas cotizaciones de las aseguradoras.`, 6000);
@@ -1872,8 +1873,28 @@ function demoSalud() {
   st.reco = autoReco();
   renderAll();
 }
+/* ---------- Enlace con el CRM FG ----------
+   El CRM abre el cotizador con #crm=<datos> (cliente, celular, ramo, vehículo) o con #abrir=<id> para abrir una cotización guardada.
+   El CRM lee el historial (efc_hist) porque ambos están publicados en el mismo dominio. */
+function desdeCRM() {
+  const h = location.hash;
+  if (h.startsWith("#abrir=")) { const id = decodeURIComponent(h.slice(7)); history.replaceState(null, "", location.pathname); renderAll(); if (hist().some((x) => x.id === id)) openHist(id); else toast("Esa cotización no está guardada en este navegador."); return true; }
+  if (!h.startsWith("#crm=")) return false;
+  let d = {};
+  try { d = JSON.parse(decodeURIComponent(escape(atob(h.slice(5).replace(/-/g, "+").replace(/_/g, "/"))))); } catch { d = {}; }
+  history.replaceState(null, "", location.pathname);
+  const ramo = RAMOS.includes(d.ramo) ? d.ramo : d.ramo ? "Otro" : st.ramo;
+  st = fresh(ramo);
+  if (ramo === "Otro") st.ramoOtro = d.ramo || "";
+  st.crmClienteId = d.clienteId || "";
+  Object.assign(st.cli, { nombre: d.nombre || "", documento: d.documento || "", celular: d.celular || "", correo: d.correo || "", nacimiento: d.nacimiento || "" });
+  if (isVeh()) Object.assign(st.veh, Object.fromEntries(Object.entries({ marca: d.marca, modelo: d.modelo, anio: d.anio, placa: d.placa }).filter(([, v]) => v)));
+  renderAll();
+  toast(d.nombre ? `Datos de ${d.nombre} traídos del CRM FG. Sube las cotizaciones de las aseguradoras.` : "Cotización nueva desde el CRM FG.", 6000);
+  return true;
+}
 const isDemo = location.hash.startsWith("#demo");
-if (location.hash.startsWith("#demo-salud")) demoSalud(); else if (isDemo) { demo(); if (location.hash.startsWith("#demo5")) demo5(); } else renderAll();
+if (location.hash.startsWith("#demo-salud")) demoSalud(); else if (isDemo) { demo(); if (location.hash.startsWith("#demo5")) demo5(); } else if (!desdeCRM()) renderAll();
 renderRenew();
 if (location.hash === "#demo-preview") preview();
 if (location.hash === "#demo-print") { const d = $("#doc"); d.innerHTML = buildDoc(); d.style.display = "block"; fitPages(d); document.querySelector(".app").style.display = "none"; }
