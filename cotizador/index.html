@@ -1441,9 +1441,9 @@ function hdr(first) {
   const pre = { Vehicular: "VEH", Moto: "MOT" }[st.ramo] || norm(ramoName()).slice(0, 3) || "GEN";
   const nro = `EFC-${pre}-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}`;
   const meta = first
-    ? `Cotización comparativa N° <b>${nro}</b><br>Fecha: <b>${f}</b> · Validez: <b>${esc(cfg.validez)} días</b><br>Corredor: <b>${esc(cfg.corredora)}</b>`
-    : isVeh() ? `Cotización ${st.ramo === "Moto" ? "de moto" : "vehicular"} · <b>${esc(st.cli.nombre || "")}</b><br>${esc([st.veh.marca, st.veh.modelo, st.veh.anio].filter(Boolean).join(" "))}${st.veh.placa ? " · Placa " + esc(st.veh.placa) : ""}<br>Corredor: <b>${esc(cfg.corredora)}</b>`
-    : `Seguro ${esc(ramoName())} · <b>${esc(st.cli.nombre || "")}</b><br>${esc(String(st.rie.bien || "").slice(0, 70))}<br>Corredor: <b>${esc(cfg.corredora)}</b>`;
+    ? `Cotización N° <b>${nro}</b><br>Fecha: <b>${f}</b><br>Validez: <b>${esc(cfg.validez)} días</b>`
+    : isVeh() ? `Cotización ${st.ramo === "Moto" ? "de moto" : "vehicular"} · <b>${esc(st.cli.nombre || "")}</b><br>${esc([st.veh.marca, st.veh.modelo, st.veh.anio].filter(Boolean).join(" "))}${st.veh.placa ? " · Placa " + esc(st.veh.placa) : ""}`
+    : `Seguro ${esc(ramoName())} · <b>${esc(st.cli.nombre || "")}</b><br>${esc(String(st.rie.bien || "").slice(0, 70))}`;
   const me = `<div class="d-me"><div class="mono">EFC</div><div><div class="n1">${esc(cfg.nombre)}</div>${cfg.cargo ? `<div class="n2">${esc(cfg.cargo)}</div>` : ""}</div></div>`;
   return `<div class="d-hdr">${brand}${me}<div class="d-meta">${meta}</div></div>`;
 }
