@@ -443,6 +443,14 @@
   .trust span:last-child{border-right:0}
   .trust svg{flex:none;width:13px;height:13px;color:#fff}
   .trust svg circle{color:rgba(255,255,255,.25)}
+  .pago{display:grid;grid-template-columns:auto 1fr 1fr;align-items:center;gap:0;background:linear-gradient(120deg,var(--m1),var(--m2));color:#fff;box-shadow:inset 0 -2px 0 var(--gold)}
+  .pago .pt{padding:8px 16px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.8px;color:var(--gold);border-right:1px solid rgba(255,255,255,.18);white-space:nowrap}
+  .pago .pi{display:flex;align-items:center;gap:9px;padding:7px 14px;border-right:1px solid rgba(255,255,255,.15)}
+  .pago .pi:last-child{border-right:0}
+  .pago .pi i{flex:none;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center}
+  .pago .pi i svg{width:14px;height:14px;color:#fff}
+  .pago .pi b{display:block;font-size:10.4px;line-height:1.2}
+  .pago .pi span{display:block;font-size:9px;line-height:1.3;color:#f3dfe1;margin-top:1px}
   .close{display:flex;align-items:center;gap:14px;padding:8px 16px;background:var(--panel)}
   .close .cq{font:700 40px/0.6 Georgia,serif;color:var(--red);margin-top:12px}
   .close p{flex:1;margin:0;font:italic 12px/1.4 Georgia,serif;color:var(--m2)}
@@ -1496,10 +1504,11 @@ const WHY = () => {
     ["wa", "Atención rápida por WhatsApp", "Soporte para cotizaciones, consultas y emergencias."],
     ["build", "Tarifas preferenciales y convenios corporativos", "Acceso a condiciones y beneficios negociados con las principales aseguradoras."],
   ];
-  const trust = ["Comparativo profesional de hasta 5 aseguradoras", "Acompañamiento durante toda la vigencia de la póliza", isVeh() ? "Asesoría para endosos vehiculares ante entidades financieras" : "Atención personalizada", "Acompañamiento en siniestros y reclamos", "Seguimiento postventa", "Renovaciones oportunas"];
+  // Formas de pago (reemplaza la franja de servicios, que repetía lo de las tarjetas)
+  const pago = [["wallet", "Cuotas sin intereses", "Fraccione su prima en cuotas sin intereses afiliando su débito automático."], ["doc", "Cupones sin intereses", "También puede pagar con cupones, sin intereses."]];
   return `<div class="whysec">
     <div class="wcards">${cards.map(([i, t, s], k) => `<div class="wc${i === "wa" ? " wa" : ""}"><div class="wtop"><i>${I(i)}</i><span class="wn">0${k + 1}</span></div><b>${t}</b><span>${s}</span></div>`).join("")}</div>
-    <div class="trust">${trust.map((t) => `<span>${I("check")}${t}</span>`).join("")}</div>
+    <div class="pago"><div class="pt">Formas de pago</div>${pago.map(([i, t, d]) => `<div class="pi"><i>${I(i)}</i><div><b>${t}</b><span>${d}</span></div></div>`).join("")}</div>
     <div class="close"><div class="cq">“</div><p>Nuestro compromiso es ayudarlo a obtener la mejor protección para ${bien} al mejor precio, respaldándolo antes, durante y después de la contratación de su póliza.</p>
       <div class="cta"><span class="reg">${I("shield")} Corredor registrado SBS ${esc(cfg.reg)}</span></div></div>
   </div>`;
