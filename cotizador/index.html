@@ -174,6 +174,7 @@
   .warn{border-left:5px solid var(--warn);background:var(--wsoft);border-radius:8px;padding:9px 12px}
   .pill{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:20px;padding:2px 9px;margin:2px 4px 2px 0;font-size:10.5px}
   .foot{position:absolute;left:11mm;right:11mm;bottom:6mm}
+  .foot .slim{font-size:9.5px;font-weight:600;color:var(--m1);text-align:center;letter-spacing:.3px;border-top:1.5px solid var(--m1);padding-top:5px}
   .band.me{justify-content:center;gap:20px;padding:8px 22px}
   .band.me .bl{gap:12px}
   .band.me .mono{width:46px;height:46px;font-size:15px;border-width:2.5px;box-shadow:0 0 0 3px rgba(255,255,255,.08)}
@@ -1427,7 +1428,9 @@ function cell(v) {
   if (/^no\b/i.test(s)) return `<span class="ic n">✕</span>${esc(s)}`;
   return esc(s);
 }
-function band() {
+function band(conContacto) {
+  // El celular y el correo van una sola vez: en la franja de la última hoja. Las demás llevan un pie delgado.
+  if (!conContacto) return `<div class="slim">${esc(cfg.corredora)} · Registro SBS ${esc(cfg.reg)} · ${esc(cfg.nombre)}</div>`;
   const pill = (ic, l, v) => String(v || "").trim() ? `<div class="pill">${I(ic)}<div><span>${l}</span><b>${esc(v)}</b></div></div>` : "";
   const k = pill("phone", "Celular / WhatsApp", cfg.cel) + pill("mail", "Correo", cfg.mail);
   return `<div class="band me"><div class="bl"><div class="mono">EFC</div><div><div class="bn">${esc(cfg.nombre)}</div>${cfg.cargo ? `<div class="bt">${esc(cfg.cargo)}</div>` : ""}</div></div>${k ? `<div class="sep"></div><div class="bk2">${k}</div>` : ""}</div>`;
@@ -1454,14 +1457,13 @@ function table(rows, qs, w) {
   return `<table>${head}<tbody>${body}</tbody></table>`;
 }
 const WHY = () => {
-  const n = String(cfg.cel || "").trim();
   const bien = isVeh() ? (st.ramo === "Moto" ? "su moto" : "su vehículo") : "usted y los suyos";
   const cards = [
     ["scale", "Comparativo entre aseguradoras", "Compararemos Rímac, Pacífico, Mapfre, La Positiva y Qualitas para encontrar la mejor alternativa."],
     ["award", "Asesoría especializada sin costo", "Análisis personalizado de coberturas, deducibles y beneficios según el perfil del cliente."],
     ["life", "Atención integral de siniestros", "Acompañamiento desde el reporte hasta la indemnización."],
     ["refresh", "Renovación y seguimiento anual", "Control de vencimientos y búsqueda continua de mejores condiciones."],
-    ["wa", "Atención rápida por WhatsApp", `Soporte para cotizaciones, consultas y emergencias.${n ? `<em>${I("wa")} ${esc(n)}</em>` : ""}`],
+    ["wa", "Atención rápida por WhatsApp", "Soporte para cotizaciones, consultas y emergencias."],
     ["build", "Tarifas preferenciales y convenios corporativos", "Acceso a condiciones y beneficios negociados con las principales aseguradoras."],
   ];
   const trust = ["Comparativo profesional de hasta 5 aseguradoras", "Acompañamiento durante toda la vigencia de la póliza", "Atención personalizada", "Gestión de siniestros", "Seguimiento postventa", "Renovaciones oportunas"];
@@ -1469,7 +1471,7 @@ const WHY = () => {
     <div class="wcards">${cards.map(([i, t, s], k) => `<div class="wc${i === "wa" ? " wa" : ""}"><div class="wtop"><i>${I(i)}</i><span class="wn">0${k + 1}</span></div><b>${t}</b><span>${s}</span></div>`).join("")}</div>
     <div class="trust">${trust.map((t) => `<span>${I("check")}${t}</span>`).join("")}</div>
     <div class="close"><div class="cq">“</div><p>Nuestro compromiso es ayudarlo a obtener la mejor protección para ${bien} al mejor precio, respaldándolo antes, durante y después de la contratación de su póliza.</p>
-      <div class="cta"><span class="reg">${I("shield")} Corredor registrado SBS ${esc(cfg.reg)}</span>${n ? `<span class="go">${I("wa")} Escríbame hoy: ${esc(n)}</span>` : ""}</div></div>
+      <div class="cta"><span class="reg">${I("shield")} Corredor registrado SBS ${esc(cfg.reg)}</span></div></div>
   </div>`;
 };
 // Cierre personal de la recomendación (sin firma) + QR que abre tu WhatsApp
@@ -1480,7 +1482,7 @@ function firma() {
   const n = String(cfg.cel || "").replace(/\D/g, ""), num = n.length === 9 && n[0] === "9" ? "51" + n : n;
   const msg = `Hola ${String(cfg.nombre || "").trim().split(/\s+/)[0]}, revisé mi cotización de seguro ${isVeh() ? (st.ramo === "Moto" ? "de moto" : "vehicular") : ramoName().toLowerCase()} y quiero más información.`;
   const qr = num ? qrSVG(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`) : "";
-  return `<div class="firma"><div class="mono">EFC</div><div class="who"><b>${esc(cfg.nombre)}</b>${cfg.cargo ? `<span>${esc(cfg.cargo)}</span>` : ""}</div>${qr ? `<div class="qr"><div class="qt"><b>Cotiza o contrata directamente por WhatsApp</b><span>Escanee para atención inmediata</span><i>${I("wa")} ${esc(cfg.cel)}</i></div><div class="qrb">${qr}</div></div>` : ""}</div>`;
+  return `<div class="firma"><div class="mono">EFC</div><div class="who"><b>${esc(cfg.nombre)}</b>${cfg.cargo ? `<span>${esc(cfg.cargo)}</span>` : ""}</div>${qr ? `<div class="qr"><div class="qt"><b>Cotiza o contrata directamente por WhatsApp</b><span>Escanee para atención inmediata</span></div><div class="qrb">${qr}</div></div>` : ""}</div>`;
 }
 function recoBox(w) {
   const lines = (st.reco || "").split("\n").map((s) => s.trim()).filter(Boolean);
@@ -1498,7 +1500,7 @@ function applyFmt() {
 }
 applyFmt();
 document.getElementById("fmtSel").addEventListener("change", (e) => { pdfFmt = e.target.value; store("efc_fmt", pdfFmt); applyFmt(); if ($("#previewModal").classList.contains("show")) preview(); });
-const pageWrap = (pages, legal) => pages.map((html, i) => `<section class="page${pdfFmt === "v" ? " vt" : ""}"><div class="content">${html}</div><div class="foot">${band()}<div class="legal">${i === pages.length - 1 ? legal + " · " : ""}Página ${i + 1} de ${pages.length}</div></div></section>`).join("");
+const pageWrap = (pages, legal) => pages.map((html, i) => `<section class="page${pdfFmt === "v" ? " vt" : ""}"><div class="content">${html}</div><div class="foot">${band(i === pages.length - 1)}<div class="legal">${i === pages.length - 1 ? legal + " · " : ""}Página ${i + 1} de ${pages.length}</div></div></section>`).join("");
 // Cotización en UNA sola hoja horizontal: a la izquierda el comparativo; al final (derecha)
 // la recomendación, los beneficios adicionales y por qué contratar con nosotros.
 // Bloque principal: la recomendación con prima, ahorro y beneficios
