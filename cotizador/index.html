@@ -340,6 +340,8 @@
   .firma .qt span{font-size:9.3px;color:var(--muted)}
   .firma .qt i{font-style:normal;display:inline-flex;gap:4px;align-items:center;background:#1fa855;color:#fff;border-radius:20px;padding:2px 9px;font-size:9.6px;font-weight:700;margin-top:2px}
   .firma .qr .qt svg{width:11px;height:11px;padding:0;border:0;background:none;border-radius:0}
+  .firma .qt em.qc{font-style:normal;font-size:11px;font-weight:700;color:var(--ink);margin-top:4px;white-space:nowrap}
+  .firma .qt em.qm{font-size:9.6px;font-weight:600;color:var(--m1);margin-top:0}
   .firma .qrb{padding:4px;border:2px solid var(--m1);border-radius:9px;background:#fff}
   .firma .qr .qrb svg{width:100px;height:100px;border:0;padding:0}
   .btm{margin-top:9px}
@@ -1484,7 +1486,7 @@ function firma() {
   const n = String(cfg.cel || "").replace(/\D/g, ""), num = n.length === 9 && n[0] === "9" ? "51" + n : n;
   const msg = `Hola ${String(cfg.nombre || "").trim().split(/\s+/)[0]}, revisé mi cotización de seguro ${isVeh() ? (st.ramo === "Moto" ? "de moto" : "vehicular") : ramoName().toLowerCase()} y quiero más información.`;
   const qr = num ? qrSVG(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`) : "";
-  return `<div class="firma"><div class="mono">EFC</div><div class="who"><b>${esc(cfg.nombre)}</b>${cfg.cargo ? `<span>${esc(cfg.cargo)}</span>` : ""}</div>${qr ? `<div class="qr"><div class="qt"><b>Cotiza o contrata directamente por WhatsApp</b><span>Escanee para atención inmediata</span></div><div class="qrb">${qr}</div></div>` : ""}</div>`;
+  return `<div class="firma"><div class="mono">EFC</div><div class="who"><b>${esc(cfg.nombre)}</b>${cfg.cargo ? `<span>${esc(cfg.cargo)}</span>` : ""}</div>${qr ? `<div class="qr"><div class="qt"><b>Cotiza o contrata directamente por WhatsApp</b><span>Escanee para atención inmediata</span>${cfg.cel ? `<em class="qc">Cel. ${esc(cfg.cel)}</em>` : ""}${cfg.mail ? `<em class="qc qm">${esc(cfg.mail)}</em>` : ""}</div><div class="qrb">${qr}</div></div>` : ""}</div>`;
 }
 function recoBox(w) {
   const lines = (st.reco || "").split("\n").map((s) => s.trim()).filter(Boolean);
