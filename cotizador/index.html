@@ -68,6 +68,11 @@
   .empty{color:var(--muted);text-align:center;padding:20px}
 
   textarea{width:100%;border:1px solid #d9d3d4;border-radius:8px;padding:8px 10px;font-size:13px;min-height:120px}
+  .asebox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+  .asebox .aon{display:flex;gap:7px;align-items:center;font-weight:600;margin-bottom:8px}
+  .asegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 12px}
+  .asegrid label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+  .asebox.off .asegrid{opacity:.45;pointer-events:none}
   .row2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 
   .modal{position:fixed;inset:0;background:rgba(20,8,10,.55);z-index:50;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 10px}
@@ -360,6 +365,7 @@
   .vt .hero-body .firma.f2 .fbody{flex-direction:column;align-items:stretch;gap:12px}
   .firma.f2 .fcont{display:flex;flex-direction:column;gap:7px;min-width:0}
   .firma.f2 .fc{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap}
+  .firma.f2 .fc small{display:block;font-size:8.2px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:1px}
   .firma.f2 .fc.cel span{font-size:12.5px;font-weight:700;letter-spacing:.3px}
   .firma.f2 .fc svg{flex:none;width:22px;height:22px;padding:5px;border-radius:50%;background:var(--m1);color:#fff;border:0;box-sizing:border-box}
   .firma.f2 .fqr{display:flex;align-items:center;gap:10px;flex:none}
@@ -408,6 +414,7 @@
   .vt .reqs2{order:4}
   .vt .side>div:first-child{order:5;margin-top:10px}
   .vt .hero-body{display:grid;grid-template-columns:1.5fr 1fr;gap:0 16px;align-items:start}
+  .vt .hero-body.nof{grid-template-columns:1fr}
   .vt .hero-body>.hb-t,.vt .hero-body>ul,.vt .hero-body>.alt,.vt .hero-body>.sum{grid-column:1}
   .vt .hero-body .firma{grid-column:2;grid-row:1 / span 4;border-top:0;border-left:1px dashed #e3c4c7;margin:0;padding:0 0 0 14px;flex-direction:column;align-items:stretch}
   .vt .whyc{grid-template-columns:repeat(4,1fr)}
@@ -589,6 +596,11 @@
       <textarea id="reco"></textarea>
       <div class="sub2">Resumen para el cliente (opcional, sale en el PDF)</div>
       <textarea id="resumen" style="min-height:70px" placeholder="Lo escribe la IA al analizar; también puedes escribirlo tú."></textarea>
+      <div class="sub2">Asesor que atiende esta cotización (sale en la hoja 2 con el QR de WhatsApp; se recuerda para la próxima)</div>
+      <div class="asebox">
+        <label class="aon"><input type="checkbox" id="aOn"> Mostrar el bloque del asesor en la cotización</label>
+        <div class="asegrid"><label>Nombre del asesor<input id="aNom"></label><label>Cargo<input id="aCar" placeholder="Ej. Ejecutivo de ventas"></label><label>Celular / WhatsApp (también para el QR)<input id="aCel"></label><label>Correo de atención y consultas<input id="aMail"></label></div>
+      </div>
     </section>
   </div>
 </div>
@@ -1613,13 +1625,30 @@ const WHY = () => {
 function qrSVG(text) {
   try { const q = qrcode(0, "M"); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 2, margin: 0, scalable: true }); } catch { return ""; }
 }
+// Datos del asesor del bloque de contacto (editables en el paso 4; por defecto los de Configuración)
+const ASE = Object.assign({ on: true, nombre: cfg.nombre, cargo: cfg.cargo, cel: cfg.cel, mail: cfg.mail }, JSON.parse(store("efc_ase") || "{}"));
+function renderAse() {
+  $("#aOn").checked = ASE.on !== false;
+  for (const [id, k] of [["aNom", "nombre"], ["aCar", "cargo"], ["aCel", "cel"], ["aMail", "mail"]]) $("#" + id).value = ASE[k] || "";
+  $(".asebox").classList.toggle("off", ASE.on === false);
+}
+$(".asebox").addEventListener("input", (e) => {
+  const k = { aOn: "on", aNom: "nombre", aCar: "cargo", aCel: "cel", aMail: "mail" }[e.target.id];
+  if (!k) return;
+  ASE[k] = k === "on" ? e.target.checked : e.target.value;
+  store("efc_ase", JSON.stringify(ASE));
+  $(".asebox").classList.toggle("off", ASE.on === false);
+});
+renderAse();
 function firma() {
+  if (ASE.on === false) return "";
+  const cfg = { nombre: ASE.nombre, cargo: ASE.cargo, cel: ASE.cel, mail: ASE.mail };
   const n = String(cfg.cel || "").replace(/\D/g, ""), num = n.length === 9 && n[0] === "9" ? "51" + n : n;
   const msg = `Hola ${String(cfg.nombre || "").trim().split(/\s+/)[0]}, revisé mi cotización de seguro ${isVeh() ? (st.ramo === "Moto" ? "de moto" : "vehicular") : ramoName().toLowerCase()} y quiero más información.`;
   const qr = num ? qrSVG(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`) : "";
   // Bloque de firma ordenado: nombre y cargo, línea dorada, contacto a la izquierda y QR con su leyenda a la derecha
-  const fila = (ic, v, c) => String(v || "").trim() ? `<div class="fc ${c}">${I(ic)}<span>${esc(v)}</span></div>` : "";
-  const contacto = fila("phone", cfg.cel, "cel") + fila("mail", cfg.mail, "mail");
+  const fila = (ic, v, c, l) => String(v || "").trim() ? `<div class="fc ${c}">${I(ic)}<span>${l ? `<small>${l}</small>` : ""}${esc(v)}</span></div>` : "";
+  const contacto = fila("phone", cfg.cel, "cel") + fila("mail", cfg.mail, "mail", "Atención y consultas");
   return `<div class="firma f2"><div class="who"><b>${esc(cfg.nombre)}</b>${cfg.cargo ? `<span>${esc(cfg.cargo)}</span>` : ""}<i class="rule"></i></div><div class="fbody">${contacto ? `<div class="fcont">${contacto}</div>` : ""}${qr ? `<div class="fqr"><div class="qrb">${qr}</div><div class="qcap"><b>Cotice o contrate por WhatsApp</b>Escanee para atención inmediata</div></div>` : ""}</div></div>`;
 }
 function recoBox(w) {
@@ -1654,7 +1683,7 @@ function heroReco(w) {
   if (s && s.d > 0) sv = { v: s.d, pct: s.pct, l: `vs. su póliza actual${s.aseg ? ` (${s.aseg})` : ""}` };
   else if (w.d.prima_anual && next > w.d.prima_anual) sv = { v: next - w.d.prima_anual, pct: Math.round(((next - w.d.prima_anual) / next) * 100), l: "vs. la siguiente opción" };
   const kpi = (ic, l, v, sub, cls = "") => `<div class="kpi ${cls}">${I(ic)}<span>${l}</span><b>${v}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
-  const dw = dscOf(w);
+  const dw = dscOf(w), fm = firma();
   const kpis = kpi("wallet", dw ? "Prima con descuento" : "Prima anual", `${esc(cur)} ${fmt(w.d.prima_anual)}`, dw ? `Antes <s>${esc(cur)} ${fmt(dw.base)}</s> · ${esc(w.d.cuotas_detalle || "")}` : esc(w.d.cuotas_detalle || "")) +
     (sv ? kpi("down", "Ahorro anual", `${esc(cur)} ${fmt(sv.v)}`, esc(sv.l), "gold") + kpi("pct", "% de ahorro", `${sv.pct}%`, "menos al año", "gold") : "");
   const hoy = s ? `<div class="hoy">Hoy paga <b>${esc(cur)} ${fmt(s.a)}</b>${s.aseg ? ` con ${esc(s.aseg)}` : ""} · con ${esc(nameOf(w))} pagaría <b>${esc(cur)} ${fmt(w.d.prima_anual)}</b>${s.d < 0 ? ` · diferencia de ${esc(cur)} ${fmt(-s.d)} al año` : ""}</div>` : "";
@@ -1663,11 +1692,11 @@ function heroReco(w) {
       <div class="hero-id"><div class="hl">${logoOf(w)}</div><div><div class="hn">${esc(lines[0] || nameOf(w))}</div><div class="seal">${I("shield")} MEJOR RELACIÓN COBERTURA / PRECIO</div></div></div>
       ${dw ? `<div class="dscb">${I("tag")}<span>Descuento especial aplicado: <b>−${pctTxt(dw.pct)}%</b></span><span>Precio regular <s>${esc(cur)} ${fmt(dw.base)}</s></span><span>Precio para usted <b>${esc(cur)} ${fmt(dw.fin)}</b></span><span class="ah">Usted ahorra ${esc(cur)} ${fmt(dw.ah)}</span></div>` : ""}
       <div class="kpis">${kpis}</div>${hoy}</div>
-    <div class="hero-body">
+    <div class="hero-body${fm ? "" : " nof"}">
       ${pts.length ? `<div class="hb-t">Beneficios principales</div><ul class="chk">${pts.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul>` : ""}
       ${alt ? `<p class="alt"><b>Alternativa:</b> ${esc(alt.replace(/^alternativa:?\s*/i, ""))}</p>` : ""}
       ${st.resumen ? `<p class="sum">${esc(st.resumen)}</p>` : ""}
-      ${firma()}
+      ${fm}
     </div></div>`;
 }
 // Cotización en UNA sola hoja horizontal, estilo ejecutivo: comparativo + recomendación arriba;
