@@ -250,6 +250,7 @@
   .firma .qr b{color:var(--good)}
   .firma .qr svg{width:74px;height:74px;display:block;background:#fff;padding:3px;border-radius:4px;border:1px solid var(--line)}
   .legal{font-size:8.8px;color:var(--muted);margin-top:3px;text-align:center}
+  .foot .fline{border-top:1.5px solid var(--m1);margin-bottom:2px}
   /* Colores EFC (vino) en todo el PDF */
   .page h2{color:var(--m2)}
   .page h2::after{height:2px;background:linear-gradient(90deg,var(--m1),transparent)}
@@ -1587,8 +1588,8 @@ function cell(v) {
 function band(conContacto) {
   // El celular y el correo van una sola vez: en la franja de la última hoja. Las demás llevan un pie delgado.
   if (!conContacto) return `<div class="slim">${esc(cfg.corredora)} · Registro SBS ${esc(cfg.reg)} · ${esc(cfg.nombre)}</div>`;
-  // Franja final: logo de Alta | nombre y cargo, centrados y separados por una línea (el contacto va junto al QR)
-  return `<div class="band me fin"><div class="blogo"><img src="${ALTA_LOGO}" alt="${esc(cfg.corredora)}"></div><div class="sep"></div><div class="bwho"><div class="bn">${esc(cfg.nombre)}</div>${cfg.cargo ? `<div class="bt">${esc(cfg.cargo)}</div>` : ""}</div></div>`;
+  // Última hoja: sin franja de logo ni nombre (el logo va arriba y el nombre/contacto junto al QR); solo una línea fina sobre la nota legal
+  return `<div class="fline"></div>`;
 }
 function hdr(first) {
   const brand = `<div class="d-brand alta"><img src="${ALTA_LOGO}" alt="Alta Corredores de Seguros"><div class="regs">Registro SBS: ${esc(cfg.reg)}<i>|</i>Registro SUSALUD: ${esc(cfg.sus)}</div></div>`;
