@@ -200,6 +200,11 @@
   .perks span{background:#fff4e0;color:#a15c00;border-radius:4px;font-size:9.3px;font-weight:700;padding:2px 6px}
   .perks span.soat{background:var(--good);color:#fff}
   .grid td.lab .btn.sm{margin-top:3px;padding:1px 6px;font-size:10.5px;font-weight:400}
+  .dscc{display:flex;flex-direction:column;gap:5px}
+  .dsci{display:flex;gap:4px}.dsci input{flex:1;min-width:0}.dsci select{width:auto}
+  .btn.sm.pri{background:var(--m1,#7a1f2b);color:#fff;border-color:transparent;font-weight:700}
+  .dsok{font-size:11px;color:#1d6b40;background:#eaf7ef;border:1px solid #bfe3cc;border-radius:6px;padding:4px 6px;line-height:1.4}
+  .dsok s{color:#8a8a8a}.dsok .btn.sm{margin-left:4px;padding:1px 6px;font-size:10.5px}
   /* Hoja única horizontal */
   .one{display:grid;grid-template-columns:1.72fr 1fr;gap:12px;margin-top:6px;align-items:start}
   .one h2{margin:2px 0 5px}
@@ -484,6 +489,13 @@
   .p2 ul.chk li{font-size:11.6px}.p2 .hero .alt,.p2 .hero .sum{font-size:11.2px}
   .p2 .bcard .bh{font-size:11.6px}.p2 .bcard ul.chk li{font-size:11px}
   .p2 .bcard .bsub{font-size:9.2px}
+  s.pl{color:#9a8d8f;font-weight:500;font-size:.78em;margin-right:3px;text-decoration-thickness:1.5px}
+  em.dtag{font-style:normal;display:inline-block;margin-left:5px;padding:1px 5px;border-radius:8px;background:#1d8a4e;color:#fff;font-size:.62em;font-weight:800;vertical-align:middle}
+  .dscb{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin:8px 0 0;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.1);border:1px dashed var(--gold2);color:#fff;font-size:10.4px}
+  .dscb svg{width:14px;height:14px;color:var(--gold2)}
+  .dscb b{color:var(--gold2)}.dscb s{opacity:.75}
+  .dscb .ah{margin-left:auto;background:linear-gradient(90deg,var(--gold2),var(--gold));color:var(--m2);font-weight:800;padding:2px 9px;border-radius:12px}
+  .kpi small s{opacity:.8}
   .bmk{border:1px solid var(--m1);border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(110,28,34,.14)}
   .bmk-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 12px;background:linear-gradient(120deg,var(--m1),var(--m2));color:#fff;box-shadow:inset 0 -2px 0 var(--gold)}
   .bmk-h span{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
@@ -495,6 +507,8 @@
   .bmk-t .bt i svg{width:14px;height:14px;color:#fff}
   .bmk-t .bt b{font-size:15px;line-height:1.1;color:var(--m2);font-weight:800}
   .bmk-t .bt span{font-size:9.4px;line-height:1.25;color:var(--muted)}
+  .bmk-t .bt.dsc{border-color:#1d8a4e;background:linear-gradient(180deg,#effaf3,#fff)}
+  .bmk-t .bt.dsc i{background:#1d8a4e}.bmk-t .bt.dsc b{color:#1d8a4e}
   .bmk-t .bt.alta{border-color:var(--gold);background:linear-gradient(180deg,#fffaf0,#fff)}
   .bmk-t .bt.alta i{background:linear-gradient(135deg,var(--gold2),var(--gold))}
   .bmk-t .bt em{position:absolute;top:-1px;right:-1px;font-style:normal;font-size:7.4px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;background:linear-gradient(90deg,var(--gold2),var(--gold));color:var(--m2);padding:2px 6px;border-radius:0 8px 0 8px}
@@ -1155,6 +1169,42 @@ function winner() {
 function renderFiles() {
   $("#files").innerHTML = st.quotes.map((q) => `<div class="fchip" title="${esc(q.err)}"><span class="dot ${q.status}"></span>${esc(q.file)}${q.status === "run" ? " · leyendo…" : q.status === "err" ? ` · <span style="color:var(--bad)">${esc(q.err)}</span>` : ""}</div>`).join("");
 }
+/* ---------- Descuento en la prima (lo aplica el corredor con el botón; recalcula la prima) ---------- */
+// q.dsc = { tipo: "pct" | "monto", v, base: prima sin descuento, baseCuotas: texto de cuotas original }
+// q.dscDraft = lo que se escribe antes de pulsar «Aplicar descuento»
+const dscOf = (q) => (q.dsc && q.dsc.base > 0 && q.d.prima_anual < q.dsc.base ? { base: q.dsc.base, fin: q.d.prima_anual, ah: Math.round((q.dsc.base - q.d.prima_anual) * 100) / 100, pct: Math.round(((q.dsc.base - q.d.prima_anual) / q.dsc.base) * 1000) / 10 } : null);
+const pctTxt = (n) => String(n).replace(".", ",").replace(/,0$/, "");
+function nCuotas(q, txt) {
+  if (q.d.num_cuotas > 0) return q.d.num_cuotas;
+  const m = [...String(txt || "").matchAll(/(\d+)\s*(?:×|x\b|cuotas?)/gi)].map((x) => Number(x[1]));
+  return m.length ? m.reduce((a, b) => a + b, 0) : 0;
+}
+function aplicarDescuento(q) {
+  const dr = q.dscDraft || {}, v = Number(dr.v) || 0, tipo = dr.tipo === "monto" ? "monto" : "pct";
+  const base = q.dsc?.base || q.d.prima_anual || 0, baseCuotas = q.dsc ? q.dsc.baseCuotas : q.d.cuotas_detalle;
+  if (!base) return toast("Primero pon la prima anual de esta aseguradora.");
+  if (v <= 0 || (tipo === "pct" && v >= 100) || (tipo === "monto" && v >= base)) return toast("Escribe un descuento válido (en % o en monto, menor que la prima).");
+  const fin = Math.round((tipo === "pct" ? base * (1 - v / 100) : base - v) * 100) / 100;
+  q.dsc = { tipo, v, base, baseCuotas };
+  q.d.prima_anual = fin;
+  const n = nCuotas(q, baseCuotas), cur = q.d.moneda || "US$";
+  q.d.cuotas_detalle = n > 0 ? `${n} cuotas de ${cur} ${fmt(fin / n)}` : baseCuotas;
+}
+function quitarDescuento(q) {
+  if (!q.dsc) return;
+  q.d.prima_anual = q.dsc.base; q.d.cuotas_detalle = q.dsc.baseCuotas; delete q.dsc;
+}
+// Prima tachada + prima final + etiqueta de descuento (para el PDF)
+const primaHTML = (q, cur) => { const d = dscOf(q); return d ? `<s class="pl">${esc(cur)} ${fmt(d.base)}</s> ${esc(cur)} ${fmt(d.fin)}<em class="dtag">−${pctTxt(d.pct)}%</em>` : q.d.prima_anual ? `${esc(cur)} ${fmt(q.d.prima_anual)}` : ""; };
+function dscRow(qs) {
+  const cell = (q) => {
+    const d = dscOf(q), dr = (q.dscDraft ??= { tipo: q.dsc?.tipo || "pct", v: q.dsc?.v || "" }), cur = q.d.moneda || "US$";
+    return `<div class="dscc"><div class="dsci"><input type="number" min="0" step="0.01" placeholder="Ej. 15" data-q="${q.id}" data-dsc="v" value="${esc(dr.v || "")}"><select data-q="${q.id}" data-dsc="tipo"><option value="pct" ${dr.tipo !== "monto" ? "selected" : ""}>%</option><option value="monto" ${dr.tipo === "monto" ? "selected" : ""}>${esc(cur)}</option></select></div>
+      <button class="btn sm pri" data-f="dscOn" data-q="${q.id}">${d ? "Actualizar descuento" : "Aplicar descuento"}</button>
+      ${d ? `<div class="dsok">✓ <s>${esc(cur)} ${fmt(d.base)}</s> → <b>${esc(cur)} ${fmt(d.fin)}</b> · ahorra ${esc(cur)} ${fmt(d.ah)} (−${pctTxt(d.pct)}%) <button class="btn sm" data-f="dscOff" data-q="${q.id}">Quitar</button></div>` : ""}</div>`;
+  };
+  return `<tr class="sec"><td colspan="${qs.length + 1}">🏷️ Descuento en la prima (de la compañía o manual; recalcula la prima y sale tachado en el PDF)</td></tr><tr><td class="lab">Descuento a aplicar</td>${qs.map((q) => `<td>${cell(q)}</td>`).join("")}</tr>`;
+}
 function comGridRows(qs) {
   const cell = (q, c) => {
     const v = X(q)[c.k];
@@ -1164,7 +1214,7 @@ function comGridRows(qs) {
   };
   const row = (c) => `<tr><td class="lab">${c.l}${qs.length > 1 ? `<br><button class="btn sm" data-f="xall" data-k="${c.k}" data-q="${qs[0].id}">Igual en todas</button>` : ""}</td>${qs.map((q) => `<td>${cell(q, c)}</td>`).join("")}</tr>`;
   const grupo = (g, t) => { const fs = comFields().filter((c) => c.g === g); return fs.length ? `<tr class="sec"><td colspan="${qs.length + 1}">${t}</td></tr>` + fs.map(row).join("") : ""; };
-  return grupo("alta", "🎁 Obsequio de Alta Corredores (lo regalas tú; sale aparte en el PDF)") + grupo("aseg", "Beneficios de la aseguradora (descuentos, campañas y formas de pago)");
+  return dscRow(qs) + grupo("alta", "🎁 Obsequio de Alta Corredores (lo regalas tú; sale aparte en el PDF)") + grupo("aseg", "Beneficios de la aseguradora (descuentos, campañas y formas de pago)");
 }
 function genRows(qs) {
   const rows = Object.fromEntries(SECS.map((s) => [s, new Map()]));
@@ -1242,6 +1292,7 @@ $("#grid").addEventListener("input", (e) => {
     if (it) it.valor = el.value; else q.d.items.push({ seccion: s, concepto: el.dataset.label, valor: el.value });
     return;
   }
+  if (q && el.dataset.dsc) { (q.dscDraft ??= {})[el.dataset.dsc] = el.value; return; }
   if (q && el.dataset.x) {
     X(q)[el.dataset.x] = el.type === "checkbox" ? el.checked : el.type === "number" || el.tagName === "SELECT" ? Math.max(0, Number(el.value) || 0) : el.value;
     if (!st.recoEdited) st.reco = autoReco(), ($("#reco").value = st.reco);
@@ -1250,6 +1301,7 @@ $("#grid").addEventListener("input", (e) => {
   if (q && el.dataset.list) { q.d[el.dataset.list] = el.value.split("\n").map((x) => x.trim()).filter(Boolean); return; }
   if (!q || !el.dataset.p) return;
   setp(q.d, el.dataset.p, el.type === "number" ? Number(el.value) : el.value);
+  if (el.dataset.p === "prima_anual" && q.dsc) delete q.dsc; // prima escrita a mano: es la nueva prima sin descuento
   if (!st.recoEdited) st.reco = autoReco(), ($("#reco").value = st.reco);
   renderAlerts();
 });
@@ -1274,6 +1326,12 @@ $("#grid").addEventListener("click", (e) => {
     return renderAll();
   }
   const i = st.quotes.findIndex((x) => x.id === Number(el.dataset.q));
+  if (el.dataset.f === "dscOn" || el.dataset.f === "dscOff") {
+    const q = st.quotes[i];
+    if (el.dataset.f === "dscOn") { aplicarDescuento(q); if (!q.dsc) return; } else quitarDescuento(q);
+    if (!st.recoEdited) st.reco = autoReco();
+    return renderAll();
+  }
   if (el.dataset.f === "txt") { $("#txtTitle").textContent = st.quotes[i].file; $("#txtBody").value = st.quotes[i].text; $("#txtModal").classList.add("show"); return; }
   if (el.dataset.f === "del") { if (confirm("¿Quitar esta aseguradora del comparativo?")) st.quotes.splice(i, 1); }
   if (el.dataset.f === "dup") {
@@ -1341,7 +1399,6 @@ const X = (q) => (q.x ??= {});
 const COM = [
   { k: "soat", l: "SOAT gratis", t: "sel", opts: [[0, "No"], [1, "1 año"], [2, "2 años"]], veh: true, g: "alta" },
   { k: "gps", l: "Descuento en GPS (%)", t: "num", veh: true, g: "alta" },
-  { k: "dsctoA", l: "Descuento de la aseguradora (%)", t: "num", g: "aseg" },
   { k: "gratis", l: "Cuota gratis (N° de cuotas)", t: "num", g: "aseg" },
   { k: "vales", l: "Vales de combustible (ej. S/ 100)", t: "txt", veh: true, g: "aseg" },
   { k: "c12", l: "Cuotas sin interés con débito automático (N° de cuotas)", t: "num", g: "aseg" },
@@ -1376,7 +1433,8 @@ function comTable(order, curOf) {
   return Object.keys(label).filter((k) => per.some((o) => o[k])).map((k) => ({ l: label[k], vals: per.map((o) => !o[k] ? "No" : k === "soat" ? o[k].replace(/^SOAT gratis por /, "") : o[k].replace(/^(\d+) cuotas sin interés de /, "$1 × ").replace(/^(\d+) cupones sin interés de /, "$1 × ").replace(/^Al contado: /, "")) }));
 }
 function perkLine(q, cur) {
-  const o = perksOf(q, cur), t = [];
+  const o = perksOf(q, cur), t = [], dd = dscOf(q);
+  if (dd) t.push(`descuento especial de ${pctTxt(dd.pct)}% ya aplicado (antes ${cur} ${fmt(dd.base)}, ahorra ${cur} ${fmt(dd.ah)})`);
   if (o.soat) t.push(o.soat);
   if (o.c12) t.push(o.c12 + " con débito automático");
   if (o.dsctoA) t.push(o.dsctoA);
@@ -1537,7 +1595,6 @@ function table(rows, qs, w) {
   return `<table>${head}<tbody>${body}</tbody></table>`;
 }
 const WHY = () => {
-  const bien = isVeh() ? (st.ramo === "Moto" ? "su moto" : "su vehículo") : "usted y los suyos";
   const cards = [
     ["scale", "Comparativo entre aseguradoras", "Compararemos Rímac, Pacífico, Mapfre, La Positiva y Qualitas para encontrar la mejor alternativa."],
     ["award", "Asesoría especializada sin costo", "Análisis personalizado de coberturas, deducibles y beneficios según el perfil del cliente."],
@@ -1548,7 +1605,7 @@ const WHY = () => {
   ];
   return `<div class="whysec">
     <div class="wcards">${cards.map(([i, t, s], k) => `<div class="wc${i === "wa" ? " wa" : ""}"><div class="wtop"><i>${I(i)}</i><span class="wn">0${k + 1}</span></div><b>${t}</b><span>${s}</span></div>`).join("")}</div>
-    <div class="close"><div class="cq">“</div><p>Nuestro compromiso es ayudarlo a obtener la mejor protección para ${bien} al mejor precio, respaldándolo antes, durante y después de la contratación de su póliza.</p>
+    <div class="close"><div class="cq">“</div><p>Mantente en contacto con el asesor que gestionó tu cotización. Estaremos a tu lado para resolver dudas, gestionar trámites, atender siniestros, coordinar endosos, acompañar tus renovaciones y brindarte el mejor respaldo durante toda la vigencia de tu póliza.</p>
       <div class="cta"><span class="reg">${I("shield")} Corredor registrado SBS ${esc(cfg.reg)}</span></div></div>
   </div>`;
 };
@@ -1597,12 +1654,14 @@ function heroReco(w) {
   if (s && s.d > 0) sv = { v: s.d, pct: s.pct, l: `vs. su póliza actual${s.aseg ? ` (${s.aseg})` : ""}` };
   else if (w.d.prima_anual && next > w.d.prima_anual) sv = { v: next - w.d.prima_anual, pct: Math.round(((next - w.d.prima_anual) / next) * 100), l: "vs. la siguiente opción" };
   const kpi = (ic, l, v, sub, cls = "") => `<div class="kpi ${cls}">${I(ic)}<span>${l}</span><b>${v}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
-  const kpis = kpi("wallet", "Prima anual", `${esc(cur)} ${fmt(w.d.prima_anual)}`, esc(w.d.cuotas_detalle || "")) +
+  const dw = dscOf(w);
+  const kpis = kpi("wallet", dw ? "Prima con descuento" : "Prima anual", `${esc(cur)} ${fmt(w.d.prima_anual)}`, dw ? `Antes <s>${esc(cur)} ${fmt(dw.base)}</s> · ${esc(w.d.cuotas_detalle || "")}` : esc(w.d.cuotas_detalle || "")) +
     (sv ? kpi("down", "Ahorro anual", `${esc(cur)} ${fmt(sv.v)}`, esc(sv.l), "gold") + kpi("pct", "% de ahorro", `${sv.pct}%`, "menos al año", "gold") : "");
   const hoy = s ? `<div class="hoy">Hoy paga <b>${esc(cur)} ${fmt(s.a)}</b>${s.aseg ? ` con ${esc(s.aseg)}` : ""} · con ${esc(nameOf(w))} pagaría <b>${esc(cur)} ${fmt(w.d.prima_anual)}</b>${s.d < 0 ? ` · diferencia de ${esc(cur)} ${fmt(-s.d)} al año` : ""}</div>` : "";
   return `<div class="hero">
     <div class="hero-top"><div class="ribbon">★ MEJOR OPCIÓN · MÁS RECOMENDADA ★</div>
       <div class="hero-id"><div class="hl">${logoOf(w)}</div><div><div class="hn">${esc(lines[0] || nameOf(w))}</div><div class="seal">${I("shield")} MEJOR RELACIÓN COBERTURA / PRECIO</div></div></div>
+      ${dw ? `<div class="dscb">${I("tag")}<span>Descuento especial aplicado: <b>−${pctTxt(dw.pct)}%</b></span><span>Precio regular <s>${esc(cur)} ${fmt(dw.base)}</s></span><span>Precio para usted <b>${esc(cur)} ${fmt(dw.fin)}</b></span><span class="ah">Usted ahorra ${esc(cur)} ${fmt(dw.ah)}</span></div>` : ""}
       <div class="kpis">${kpis}</div>${hoy}</div>
     <div class="hero-body">
       ${pts.length ? `<div class="hb-t">Beneficios principales</div><ul class="chk">${pts.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul>` : ""}
@@ -1640,11 +1699,12 @@ const legalOf = (order, txt) => `${txt}${order.some((q) => q.ref) ? ` ${order.fi
 // la cifra grande; lo que regala el corredor lleva la cinta «Obsequio»), lo demás en lista, fecha límite de la oferta
 // y una línea con lo que dan las otras aseguradoras para que se pueda comparar.
 function tilesOf(q, cur) {
-  const x = X(q), p = q.d.prima_anual || 0, t = [];
+  const x = X(q), p = q.d.prima_anual || 0, t = [], dd = dscOf(q);
   const soat = soatAnos(x), nc = cuotasSI(x);
+  if (dd) t.push({ i: "tag", b: `−${pctTxt(dd.pct)}%`, s: `descuento ya aplicado: ahorra ${cur} ${fmt(dd.ah)}`, dsc: true });
   if (soat && isVeh()) t.push({ i: "car", b: "SOAT gratis", s: soat === 2 ? "por 2 años" : "por 1 año", alta: true });
   if (x.gps > 0 && isVeh()) t.push({ i: "pin", b: `${x.gps}%`, s: "de descuento en GPS", alta: true });
-  if (x.dsctoA > 0) t.push({ i: "pct", b: `${x.dsctoA}%`, s: "de descuento en su prima" });
+  if (x.dsctoA > 0 && !dd) t.push({ i: "pct", b: `${x.dsctoA}%`, s: "de descuento en su prima" });
   if (x.gratis > 0) t.push({ i: "gift", b: x.gratis == 1 ? "1 cuota" : `${x.gratis} cuotas`, s: "gratis" });
   if (x.vales && String(x.vales).trim() && isVeh()) t.push({ i: "fuel", b: String(x.vales).trim(), s: "en vales de combustible" });
   if (nc) t.push({ i: "wallet", b: `${nc} cuotas`, s: p ? `sin intereses de ${cur} ${fmt(p / nc)} con débito automático` : "sin intereses con débito automático" });
@@ -1658,13 +1718,13 @@ function beneficiosBlock(order, w, extras) {
   // Lo que no es cifra (campañas, extras del PDF, «ideal para») va en lista
   const nums = new Set(["soat", "gps", "dsctoA", "gratis", "vales", "c12", "cupN", "dcto"]);
   const o = perksOf(w, curOf(w)), libres = extras(w).filter((t) => !Object.entries(o).some(([k, v]) => nums.has(k) && (t === v || t === v + " con débito automático")));
-  const otras = order.filter((q) => q.id !== w.id).map((q) => { const v = [...regaloOf(q), ...extrasOf(q, curOf(q))]; return v.length ? `<b>${esc(nameOf(q))}:</b> ${v.map(esc).join(" · ")}` : ""; }).filter(Boolean);
+  const otras = order.filter((q) => q.id !== w.id).map((q) => { const dq = dscOf(q), v = [...(dq ? [`descuento de ${pctTxt(dq.pct)}% aplicado (ahorra ${curOf(q)} ${fmt(dq.ah)})`] : []), ...regaloOf(q), ...extrasOf(q, curOf(q))]; return v.length ? `<b>${esc(nameOf(q))}:</b> ${v.map(esc).join(" · ")}` : ""; }).filter(Boolean);
   if (!tiles.length && !libres.length && !otras.length) return "";
   const hasta = new Date(Date.now() + (Number(cfg.validez) || 15) * 864e5).toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
   const top = tiles.length || libres.length;
   return `<div class="bmk">
     ${top ? `<div class="bmk-h"><span>${I("gift")} Al contratar ${esc(nameOf(w))} con nosotros</span><b>usted recibe</b></div>` : ""}
-    ${tiles.length ? `<div class="bmk-t n${Math.min(tiles.length, 8)}">${tiles.map((t) => `<div class="bt${t.alta ? " alta" : ""}">${t.alta ? `<em>Obsequio ${esc(String(cfg.corredora).split(" ")[0])}</em>` : ""}<i>${I(t.i)}</i><b>${esc(t.b)}</b><span>${esc(t.s)}</span></div>`).join("")}</div>` : ""}
+    ${tiles.length ? `<div class="bmk-t n${Math.min(tiles.length, 8)}">${tiles.map((t) => `<div class="bt${t.alta ? " alta" : ""}${t.dsc ? " dsc" : ""}">${t.alta ? `<em>Obsequio ${esc(String(cfg.corredora).split(" ")[0])}</em>` : ""}<i>${I(t.i)}</i><b>${esc(t.b)}</b><span>${esc(t.s)}</span></div>`).join("")}</div>` : ""}
     ${libres.length ? `<ul class="chk bmk-l">${libres.map((x) => `<li>${I("check")}<span>${esc(x)}</span></li>`).join("")}</ul>` : ""}
     ${top ? `<div class="bmk-f">${I("clock")}<span>Beneficios reservados para usted hasta el <b>${hasta}</b>. Confírmenos hoy y nosotros hacemos todo el trámite.</span></div>` : ""}
     ${otras.length ? `<div class="bmk-o">${otras.map((x) => `<div>${x}</div>`).join("")}</div>` : ""}
@@ -1687,7 +1747,7 @@ function buildGenDoc() {
   const tr = (l, vals, best, cls = "") => `<tr class="${cls}"><td>${esc(l)}</td>${order.map((q, i) => `<td class="${best.includes(q.id) ? "best" : q.id === w.id ? "rcol" : ""}">${cell(vals[i])}</td>`).join("")}</tr>`;
   const sec = (t) => `<tr class="sec"><td colspan="${order.length + 1}">${esc(t)}</td></tr>`;
   const rows = [
-    tr("Prima anual", order.map((q) => (q.d.prima_anual ? `${cur(q)} ${fmt(q.d.prima_anual)}` : "")), lo ? order.filter((q) => q.d.prima_anual === lo).map((q) => q.id) : [], "prima"),
+    `<tr class="prima"><td>Prima anual</td>${order.map((q) => `<td class="${lo && q.d.prima_anual === lo ? "best" : q.id === w.id ? "rcol" : ""}">${primaHTML(q, cur(q))}</td>`).join("")}</tr>`,
     tr("Cuotas", order.map((q) => q.d.cuotas_detalle), []),
     tr("Suma asegurada", order.map((q) => (q.d.suma_asegurada ? `${cur(q)} ${fmt0(q.d.suma_asegurada)}` : "")), []),
     tr("Vigencia", order.map((q) => [q.d.vigencia_inicio, q.d.vigencia_fin].filter(Boolean).join(" – ")), [])];
@@ -1712,7 +1772,7 @@ function buildDoc() {
   };
   const lo = cheapest(order);
   const rows = [
-    `<tr class="prima"><td>Prima anual</td>${order.map((q) => `<td class="${lo && q.d.prima_anual === lo ? "best" : q.id === w.id ? "rcol" : ""}">US$ ${fmt(q.d.prima_anual)}</td>`).join("")}</tr>`,
+    `<tr class="prima"><td>Prima anual</td>${order.map((q) => `<td class="${lo && q.d.prima_anual === lo ? "best" : q.id === w.id ? "rcol" : ""}">${primaHTML(q, "US$")}</td>`).join("")}</tr>`,
     line({ l: "Cuotas", p: "cuotas_detalle" }),
     ...ROWS.cob.map(line),
     `<tr class="sec"><td colspan="${order.length + 1}">Servicios</td></tr>`,
@@ -1913,7 +1973,7 @@ function waText() {
   const que = isVeh() ? `${st.ramo === "Moto" ? "de su moto" : "vehicular"}${st.veh.marca ? ` (${[st.veh.marca, st.veh.modelo, st.veh.placa && "placa " + st.veh.placa].filter(Boolean).join(" ")})` : ""}` : ramoName().toLowerCase();
   const L = [`Hola ${firstName(st.cli.nombre)}, le saluda ${cfg.nombre} de ${cfg.corredora}.`, "",
     `Le envío la cotización de su seguro ${que}, comparando ${qs.length} aseguradora${qs.length > 1 ? "s" : ""}.`, "",
-    `✅ *Nuestra recomendación: ${nameOf(w)}${w.d.plan ? " – " + w.d.plan : ""}*`, `Prima anual: ${cur(w)} ${fmt(w.d.prima_anual)}`];
+    `✅ *Nuestra recomendación: ${nameOf(w)}${w.d.plan ? " – " + w.d.plan : ""}*`, `Prima anual: ${cur(w)} ${fmt(w.d.prima_anual)}${dscOf(w) ? ` (precio regular ${cur(w)} ${fmt(dscOf(w).base)}, ahorra ${cur(w)} ${fmt(dscOf(w).ah)})` : ""}`];
   const sv = savingLine(w, cur(w)); if (sv) L.push("💰 " + sv);
   const pk = perkLine(w, cur(w)); if (pk) L.push(pk);
   const why = (st.reco || "").split("\n").slice(1).filter((s) => s.trim() && !/^(alternativa|prima)/i.test(s)).slice(0, 2);
