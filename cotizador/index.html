@@ -431,6 +431,11 @@
   .vt .band.me.fin{gap:20px;padding:8px 18px}
   .vt .band.me.fin .bn{font-size:15px;letter-spacing:1.6px}
   .vt .band.me.fin .blogo img{height:30px}
+  /* Franja final en fondo blanco (mismo diseño; solo cambia el color) */
+  .band.me.fin{background:#fff;color:var(--m2);border:1px solid #e8dcdd}
+  .band.me.fin .blogo{box-shadow:none}
+  .band.me.fin .bn{color:var(--m2)}
+  .band.me.fin .bt{color:var(--mr)}
   .vt .bk2{gap:8px}
   .vt .bk2 .pill{padding:4px 12px 4px 5px;gap:7px}
   .vt .bk2 .pill>svg{width:24px;height:24px;padding:5px}
@@ -1617,8 +1622,7 @@ const WHY = () => {
   ];
   return `<div class="whysec">
     <div class="wcards">${cards.map(([i, t, s], k) => `<div class="wc${i === "wa" ? " wa" : ""}"><div class="wtop"><i>${I(i)}</i><span class="wn">0${k + 1}</span></div><b>${t}</b><span>${s}</span></div>`).join("")}</div>
-    <div class="close"><div class="cq">“</div><p>Mantente en contacto con el asesor que gestionó tu cotización. Estaremos a tu lado para resolver dudas, gestionar trámites, atender siniestros, coordinar endosos, acompañar tus renovaciones y brindarte el mejor respaldo durante toda la vigencia de tu póliza.</p>
-      <div class="cta"><span class="reg">${I("shield")} Corredor registrado SBS ${esc(cfg.reg)}</span></div></div>
+    <div class="close"><div class="cq">“</div><p>Mantente en contacto con el asesor que gestionó tu cotización. Estaremos a tu lado para resolver dudas, gestionar trámites, atender siniestros, coordinar endosos, acompañar tus renovaciones y brindarte el mejor respaldo durante toda la vigencia de tu póliza.</p></div>
   </div>`;
 };
 // Cierre personal de la recomendación (sin firma) + QR que abre tu WhatsApp
