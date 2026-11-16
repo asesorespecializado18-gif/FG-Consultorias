@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sistema de Cotizaciones EFC</title>
+<link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Libre+Baskerville:wght@700&display=swap">
 <style>
   :root{--m1:#6e1c22;--m2:#4a1216;--mr:#7a1c24;--soft:#f6eaeb;--ink:#1f2328;--muted:#6b7280;--line:#e6e2e3;--panel:#f8f6f6;--good:#0f8a4b;--gsoft:#e7f5ed;--warn:#d97706;--wsoft:#fff7e6;--bad:#b91c1c}
   *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -540,6 +541,26 @@
   .vt .p2r,.vt .p2b,.vt .p2w,.vt .p2q{grid-column:1}
   .vt .p2w{order:1}.vt .p2b{order:2}.vt .p2q{order:3}.vt .p2r{order:4}
   .vt .p2 .benc,.vt .p2 .benc.c2{grid-template-columns:repeat(3,1fr)}
+
+.cf{--m1:#6e1c22;--m2:#4a1216;--line:#e6e2e3;--muted:#6b7280;--g2:#0f7a43;margin-top:12px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#faf8f7;font-family:Inter,'Segoe UI',Arial,sans-serif;color:#1f2328;line-height:1.38;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}
+.p3>.cf{margin-top:auto}
+.cf .badge{position:static;transform:none;padding:0;white-space:normal;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9b2a33,var(--m2));color:#fff;display:grid;place-items:center;font:700 16px 'Libre Baskerville',Georgia,serif;box-shadow:0 0 0 3px #fff,0 0 0 4px #7a1c24}
+.cfbar{display:grid;grid-template-columns:46% 22% 32%;height:4px}.cfbar i:nth-child(1){background:var(--m1)}.cfbar i:nth-child(2){background:#b3343f}.cfbar i:nth-child(3){background:#d9d6d6}
+.cfm{display:grid;grid-template-columns:104px minmax(0,1fr) auto 100px;gap:10px;align-items:center;padding:9px 10px}
+.cfa img{width:100px;display:block}.cfa small{display:block;font-size:6.6px;letter-spacing:.06em;color:#555;margin-top:5px;line-height:1.45}
+.cfe{display:flex;align-items:center;gap:10px;border-left:1px solid var(--line);border-right:1px solid var(--line);padding:0 9px;min-width:0}
+.cfe b{display:block;font:700 15px 'Libre Baskerville',Georgia,serif;color:var(--m2);white-space:nowrap}
+.cfe span{display:block;letter-spacing:.08em;white-space:nowrap}.cfe .t{font-size:9px;color:var(--m1);font-weight:700;margin-top:2px}.cfe .r{white-space:normal!important;font-size:6.8px;line-height:1.35;color:#b3343f;margin-top:3px}.cfe .c{white-space:normal!important;font-size:6.8px;color:#666;margin-top:2px}
+.cfc{display:flex;flex-direction:column;align-items:flex-end;gap:1px;text-align:right}
+.cfc .l{font-size:7.5px;letter-spacing:.16em;color:var(--muted);font-weight:700}
+.cfc .mail{font-size:11px;color:var(--m2);font-weight:800;margin-bottom:5px;white-space:nowrap}
+.cfc .num{font-size:18px;color:var(--g2);font-weight:800;letter-spacing:.03em;white-space:nowrap}
+.cfq{width:100px;text-align:center}.cfq .q{border:3px solid var(--m1);border-radius:8px;padding:5px;background:#fff;width:76px;height:76px;margin:0 auto}.cfq .q svg{width:100%;height:100%;display:block}
+.cfq b{display:block;color:var(--m1);font-size:8.6px;line-height:1.2;margin-top:3px}.cfq small{display:block;font-size:7px;color:var(--muted)}
+.cfq .wa{display:inline-block;background:var(--g2);color:#fff;border-radius:999px;padding:1px 9px;font-weight:800;font-size:10px;margin-top:2px}
+.cfs{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,var(--m2),#9b2a33);color:#fff;padding:6px 14px}
+.cfs i{font:italic 700 11px 'Libre Baskerville',Georgia,serif}.cfs span{font-size:8px;letter-spacing:.14em;color:#f3d6d9}
+.foot .cf{margin-top:0}
 </style>
 </head>
 <body>
@@ -1585,11 +1606,17 @@ function cell(v) {
   if (/^no\b/i.test(s)) return `<span class="ic n">✕</span>${esc(s)}`;
   return esc(s);
 }
-function band(conContacto) {
-  // El celular y el correo van una sola vez: en la franja de la última hoja. Las demás llevan un pie delgado.
-  if (!conContacto) return `<div class="slim">${esc(cfg.corredora)} · Registro SBS ${esc(cfg.reg)} · ${esc(cfg.nombre)}</div>`;
-  // Última hoja: sin franja de logo ni nombre (el logo va arriba y el nombre/contacto junto al QR); solo una línea fina sobre la nota legal
-  return `<div class="fline"></div>`;
+function band(conContacto) { /*pie16*/
+  if (true && !conContacto) return `<div class="slim">${esc(cfg.corredora)} · Registro SBS ${esc(cfg.reg)} · ${esc(cfg.nombre)}</div>`;
+  const cel = String(cfg.cel || "").trim(), dig = cel.replace(/\D/g, ""), wa = dig ? (dig.length === 9 ? "51" + dig : dig) : "";
+  const qr = wa ? qrSVG("https://wa.me/" + wa) : "";
+  return `<div class="cf"><div class="cfbar"><i></i><i></i><i></i></div><div class="cfm">`
+    + `<div class="cfa"><img src="${ALTA_LOGO}" alt="Alta Corredores de Seguros"><small>REG. SBS ${esc(cfg.reg)}<br>REG. SUSALUD ${esc(cfg.sus)}<br>MIEMBROS DE APECOSE</small></div>`
+    + `<div class="cfe"><div class="badge" style="flex:none">EFC</div><div><b>${esc(cfg.nombre)}</b>${cfg.cargo ? `<span class="t">${esc(String(cfg.cargo).toUpperCase())}</span>` : ""}`
+    + `<span class="r">RIESGOS GENERALES · RIESGOS HUMANOS<br>CARTAS FIANZA</span><span class="c">CORREDOR DE SEGUROS · REG. SBS ${esc(cfg.reg)}</span></div></div>`
+    + `<div class="cfc">${cfg.mail ? `<span class="l">CORREO</span><b class="mail">${esc(cfg.mail)}</b>` : ""}${cel ? `<span class="l">CELULAR / WHATSAPP</span><b class="num">${esc(cel)}</b>` : ""}</div>`
+    + (qr ? `<div class="cfq"><div class="q">${qr}</div><b>Consulte su seguro por WhatsApp</b><small>Escanee para atención inmediata</small><span class="wa">${esc(cel)}</span></div>` : "<div></div>")
+    + `</div><div class="cfs"><i>“Protegemos tu patrimonio con asesoría especializada en seguros.”</i>${wa ? `<span>WA.ME/${wa}</span>` : ""}</div></div>`;
 }
 function hdr(first) {
   const brand = `<div class="d-brand alta"><img src="${ALTA_LOGO}" alt="Alta Corredores de Seguros"><div class="regs">Registro SBS: ${esc(cfg.reg)}<i>|</i>Registro SUSALUD: ${esc(cfg.sus)}</div></div>`;
