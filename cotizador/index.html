@@ -1615,7 +1615,7 @@ function band(conContacto) { /*pie16*/
     + `<div class="cfe"><div class="badge" style="flex:none">EFC</div><div><b>${esc(cfg.nombre)}</b>${cfg.cargo ? `<span class="t">${esc(String(cfg.cargo).toUpperCase())}</span>` : ""}`
     + `<span class="r">RIESGOS GENERALES · RIESGOS HUMANOS<br>CARTAS FIANZA</span><span class="c">CORREDOR DE SEGUROS · REG. SBS ${esc(cfg.reg)}</span></div></div>`
     + `<div class="cfc">${cfg.mail ? `<span class="l">CORREO</span><b class="mail">${esc(cfg.mail)}</b>` : ""}${cel ? `<span class="l">CELULAR / WHATSAPP</span><b class="num">${esc(cel)}</b>` : ""}</div>`
-    + (qr ? `<div class="cfq"><div class="q">${qr}</div><b>Consulte su seguro por WhatsApp</b><small>Escanee para atención inmediata</small><span class="wa">${esc(cel)}</span></div>` : "<div></div>")
+    + (qr ? `<div class="cfq"><div class="q">${qr}</div><b>Consulte su seguro por WhatsApp</b><small>Escanee para atención inmediata</small></div>` : "<div></div>")
     + `</div><div class="cfs"><i>“Protegemos tu patrimonio con asesoría especializada en seguros.”</i>${wa ? `<span>WA.ME/${wa}</span>` : ""}</div></div>`;
 }
 function hdr(first) {
